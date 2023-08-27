@@ -22,6 +22,7 @@ def generate_weather_sequence(probability_dry_to_rain, probability_rain_to_rain,
         sequence.append(new_state)
     return sequence
 
+# Diccionario para almacenar las secuencias climáticas
 weather_sequences = {}
 for index, row in data.iterrows():
     uva_type = row['Tipo Uva']
@@ -29,12 +30,19 @@ for index, row in data.iterrows():
     probability_dry_to_rain = row['Prob de lluvia (seca a lluvia)']
     probability_rain_to_rain = row['Prob de lluvia (lluvia a lluvia)']
     
+    # Generar secuencia hasta el día de cosecha estimado
     sequence = generate_weather_sequence(probability_dry_to_rain, probability_rain_to_rain, optimal_day)
-    weather_sequences[uva_type] = sequence
+    
+    # Generar secuencia para los próximos 7 días después del día de cosecha estimado
+    future_sequence = generate_weather_sequence(probability_dry_to_rain, probability_rain_to_rain, 7)
+    
+    weather_sequences[uva_type] = {
+        'Ultimos 7 días': sequence[-7:],
+        'Próximos 7 días': future_sequence
+    }
 
-# Paso 5: Tomar solo los últimos 7 días de cada lote
-last_7_days_sequences = {uva_type: sequence[-7:] for uva_type, sequence in weather_sequences.items()}
-
-# Imprimir el diccionario con las secuencias de los últimos 7 días para cada tipo de uva
-for uva_type, sequence in last_7_days_sequences.items():
-    print(f"Tipo de Uva: {uva_type}, Últimos 7 días: {sequence}")
+# Imprimir el diccionario con las secuencias climáticas
+for uva_type, sequences in weather_sequences.items():
+    print(f"Tipo de Uva: {uva_type}")
+    print(f"Últimos 7 días: {sequences['Ultimos 7 días']}")
+    print(f"Próximos 7 días: {sequences['Próximos 7 días']}\n")
