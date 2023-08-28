@@ -92,7 +92,7 @@ def simular():
         
         # Imprimir resultados
         print(f"Lote: {lote_cod}")
-        # ...
+        # en dia_optimo_prediccion[12] está el día óptimo
         print(f"Predicción climática: {dia_optimo_prediccion}")
 
         '''
