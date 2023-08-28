@@ -22,6 +22,8 @@ Datos_mercados = pd.read_excel(Informacion, sheet_name = info_mercados)
 Datos_fermentacion = pd.read_excel(Informacion, sheet_name = info_tramos_fermentación)
 
 
-
-
-print(Datos_lotes)
+print(Datos_nu)
+print(Datos_fermentacion)
+print(Datos_umbral)
+print(Datos_mercados)
+print(Datos_recetas)
