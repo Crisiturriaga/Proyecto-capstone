@@ -16,13 +16,17 @@ info_tramos_fermentación = 7
 Datos_lotes = pd.read_excel(Informacion,sheet_name=hoja_lotes, index_col=0)
 
 Datos_nu = pd.read_excel(Informacion, sheet_name = nu_por_uva, index_col=0)
-Datos_umbral = pd.read_excel(Informacion, sheet_name = umbral_industrializacion, index_col=0)
+Datos_umbral = pd.read_excel(Informacion, sheet_name = umbral_industrializacion, index_col=0, header=0)
 Datos_recetas = pd.read_excel(Informacion, sheet_name = receta_vinos, index_col=0)
 Datos_mercados = pd.read_excel(Informacion, sheet_name = info_mercados, index_col=0)
-Datos_fermentacion = pd.read_excel(Informacion, sheet_name = info_tramos_fermentación, index_col=1)
+Datos_fermentacion = pd.read_excel(Informacion, sheet_name = info_tramos_fermentación, index_col=0)
 
-columna = Datos_recetas["Receta"]
-print(columna)
+
+#Para acceder a una fila hacemos Datos.loc["nombre fila"]
+#Para acceder a una columna hacemos Datos["nombre columna"]
+#Para acceder a una col y fila especifica 
+fila = Datos_umbral.loc["C1","Umbral de Industrializacion"]
+print(fila)
 #print(Datos_nu)
 #print(Datos_fermentacion)
 #print(Datos_umbral)
