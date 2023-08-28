@@ -24,11 +24,4 @@ Datos_fermentacion = pd.read_excel(Informacion, sheet_name = info_tramos_ferment
 
 #Para acceder a una fila hacemos Datos.loc["nombre fila"]
 #Para acceder a una columna hacemos Datos["nombre columna"]
-#Para acceder a una col y fila especifica 
-fila = Datos_umbral.loc["C1","Umbral de Industrializacion"]
-print(fila)
-#print(Datos_nu)
-#print(Datos_fermentacion)
-#print(Datos_umbral)
-#print(Datos_mercados)
-#print(Datos_recetas)
+#Para acceder a una col y fila especifica  Hacemos Datos.loc["nombre fila", "nombre columna"]
