@@ -137,7 +137,8 @@ def simular():
     c.execute('SELECT * FROM lotes')
     lotes = c.fetchall()
     contador = 0
-    for t in range(50, 72):
+    litros_totales = 0
+    for t in range(50, 160):
         for lote in lotes:
             lote_id, lote_cod, lote_numero, lote_tipo_uva, lote_toneladas, lote_dia_optimo, lote_prob_seco_lluvia, lote_prob_lluvia_lluvia, lote_precio_usd = lote
             if t == lote_dia_optimo:
@@ -155,6 +156,9 @@ def simular():
                 umbral_calidad_uva = umbral_uva(lote_tipo_uva)
                 if calidad_lote >= umbral_calidad_uva:
                     #Calidad en buen estado, pasa a fermentacion
+                    kilos_lote = lote_toneladas*1000
+                    litros_vino = kilos_lote*0.5
+                    litros_totales += litros_vino
                     
 
                     pass
@@ -178,7 +182,9 @@ def simular():
         print(f"Predicción climática: {dia_optimo_prediccion}")
         print(f'prediccion tipo 3: {tipo_3}')'''
 
-        
+    print(litros_totales)
+    botellas = litros_totales/0.75
+    print(botellas)
     print(f'contador: {contador}')
 
 
