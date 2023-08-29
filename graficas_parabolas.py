@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 # Given points
 t_minus_7 = -7
 t_plus_7 = 7
-q_t_minus_7 = 0.85
-q_t_plus_7 = 0.95
+q_t_minus_7 = 0.93
+q_t_plus_7 = 0.94
 
 # Vertex point
 t_vertex = 0
@@ -31,18 +31,18 @@ def quality_function(t):
 # Generate data for plotting
 t_values = np.linspace(-10, 10, 400)
 q_values = [quality_function(t) for t in t_values]
-'''
+
 # Plot the function
-plt.plot(t_values, q_values, label='Quality Function')
-plt.scatter([t_minus_7, t_plus_7], [q_t_minus_7, q_t_plus_7], color='red', label='Given Points')
-plt.xlabel('t')
-plt.ylabel('q[t]')
-plt.title('Quality Function')
+plt.plot(t_values, q_values, label='Distribución normal')
+plt.scatter([t_minus_7, t_plus_7], [q_t_minus_7, q_t_plus_7], color='red', label='Puntos extremos')
+plt.xlabel('t=Días')
+plt.ylabel('q[t]=Calidad del día de cosecha t')
+plt.title('Función de calidad C6')
 plt.legend()
 plt.grid()
-plt.show()'''
+plt.show()
 
-
+'''
 def calculate_parabola_coefficients(q_t_minus, q_t_plus):
     t_minus = -7
     t_plus = 7
@@ -68,16 +68,4 @@ def calculate_optimal_day():
 
 
     return int(round(optimal_day))
-
-def quality_function(a, b, c, t):
-    return max(min(a * t**2 + b * t + c, 1), 0)
-
-def evaluate_quality_at_optimal_day(t_optimal, q_t_minus, q_t_plus):
-    a, b, c = calculate_parabola_coefficients(q_t_minus, q_t_plus)
-    q_t_optimal = quality_function(a, b, c, t_optimal)
-    return q_t_optimal
-t = calculate_optimal_day()
-t = 7
-print(t)
-q_t_optimal = evaluate_quality_at_optimal_day(t, 0.85, 0.95)
-print("Quality at optimal day:", q_t_optimal)
+'''
