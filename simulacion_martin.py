@@ -13,9 +13,20 @@ ws = wb.active
 conn = sqlite3.connect('vinos.db')
 c = conn.cursor()
 
+# parametros cosecha
 periodo_ideal = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 calidades = [[0.85, 0.95],[0.92, 0.93],[0.91, 0.87],[0.95, 0.95],[0.85, 0.85],[0.93, 0.94]]
 umbrales = [0.8, 0.75, 0.8, 0.7, 0.8, 0.7]
+
+# parametros fermentacion
+plantas = [[1600, 1840, 1840],[1500, 1725, 1725],[1800, 2070, 2070]]
+cap_plantas = 600
+tanques_x_planta = 24
+cap_tanque = 25000
+uso_plantas = [[0, 0, 0],[0, 0, 0],[0, 0, 0]]
+litros_restantes_uvas = [0, 0, 0, 0, 0, 0]
+litros_vino_uvas = [0, 0, 0, 0, 0, 0]
+# planta 2 tarmo 1 = uso_plantas[1][0]
 
 # Función para predecir el clima con markov
 def predecir_clima(dia_optimo, prob_seco_lluvia, prob_lluvia_lluvia):
@@ -98,6 +109,133 @@ def umbral_uva(uva):
         return umbrales[4]
     elif uva == 'C6':
         return umbrales[5]
+    
+def litros_restantes_uva(litros_restantes, uva):
+    if uva == 'C1':
+        litros_restantes_uvas[0] += litros_restantes
+    elif uva == 'C2':
+        litros_restantes_uvas[1] += litros_restantes
+    elif uva == 'C3':
+        litros_restantes_uvas[2] += litros_restantes
+    elif uva == 'C4':
+        litros_restantes_uvas[3] += litros_restantes
+    elif uva == 'C5':
+        litros_restantes_uvas[4] += litros_restantes
+    elif uva == 'C6':
+        litros_restantes_uvas[5] += litros_restantes
+
+def litros_vino(litros_uva, uva):
+    if uva == 'C1':
+        litros_vino_uvas[0] += litros_uva
+    elif uva == 'C2':
+        litros_vino_uvas[1] += litros_uva
+    elif uva == 'C3':
+        litros_vino_uvas[2] += litros_uva
+    elif uva == 'C4':
+        litros_vino_uvas[3] += litros_uva
+    elif uva == 'C5':
+        litros_vino_uvas[4] += litros_uva
+    elif uva == 'C6':
+        litros_vino_uvas[5] += litros_uva
+    
+def calcular_duracion_vinificacion():
+    duracion_aleatoria = random.uniform(7, 9)
+    dia_exacto = round(duracion_aleatoria)
+    return dia_exacto
+
+def conversion_lt_tanque(litros_vino):
+    tanques = 0
+    while litros_vino >= 25000:
+        litros_vino -= 25000
+        tanques += 1
+    return litros_vino, tanques
+
+def uso_tanques(tanques_utilizar):
+    tanques_a_fermentar = tanques_utilizar
+    while tanques_utilizar > 0:
+        if uso_plantas[1][0] < 24:
+            uso_plantas[1][0] += 1
+            tanques_utilizar -= 1
+        elif uso_plantas[0][0] < 24:
+            uso_plantas[0][0] += 1
+            tanques_utilizar -= 1
+        elif uso_plantas[1][1] < 24:
+            uso_plantas[1][1] += 1
+            tanques_utilizar -= 1
+        elif uso_plantas[1][2] < 24:
+            uso_plantas[1][2] += 1
+            tanques_utilizar -= 1
+        elif uso_plantas[2][0] < 24:
+            uso_plantas[2][0] += 1
+            tanques_utilizar -= 1
+        elif uso_plantas[0][1] < 24:
+            uso_plantas[0][1] += 1
+            tanques_utilizar -= 1
+        elif uso_plantas[0][2] < 24:
+            uso_plantas[0][2] += 1
+            tanques_utilizar -= 1
+        elif uso_plantas[2][1] < 24:
+            uso_plantas[2][1] += 1
+            tanques_utilizar -= 1
+        elif uso_plantas[2][2] < 24:
+            uso_plantas[2][2] += 1
+            tanques_utilizar -= 1
+        else:
+            '''litros_restantes = tanques_utilizar*25000
+            litros_restantes_uva(litros_restantes, uva)'''
+            tanques_a_fermentar -= tanques_utilizar
+            return tanques_a_fermentar, tanques_utilizar
+    return tanques_a_fermentar, tanques_utilizar
+def eliminar_tanques(tanques_utilizar, tipo_uva):
+    litros_uva = tanques_utilizar*25000
+    litros_vino(litros_uva, tipo_uva)
+    while tanques_utilizar > 0:
+        if uso_plantas[1][0] > 0:
+            uso_plantas[1][0] -= 1
+            tanques_utilizar -= 1
+        elif uso_plantas[0][0] > 0:
+            uso_plantas[0][0] -= 1
+            tanques_utilizar -= 1
+        elif uso_plantas[1][1] > 0:
+            uso_plantas[1][1] -= 1
+            tanques_utilizar -= 1
+        elif uso_plantas[1][2] > 0:
+            uso_plantas[1][2] -= 1
+            tanques_utilizar -= 1
+        elif uso_plantas[2][0] > 0:
+            uso_plantas[2][0] -= 1
+            tanques_utilizar -= 1
+        elif uso_plantas[0][1] > 0:
+            uso_plantas[0][1] -= 1
+            tanques_utilizar -= 1
+        elif uso_plantas[0][2] > 0:
+            uso_plantas[0][2] -= 1
+            tanques_utilizar -= 1
+        elif uso_plantas[2][1] > 0:
+            uso_plantas[2][1] -= 1
+            tanques_utilizar -= 1
+        elif uso_plantas[2][2] > 0:
+            uso_plantas[2][2] -= 1
+            tanques_utilizar -= 1
+        else:
+            break
+
+def sacar_tanques(lista, t):
+    indices_a_eliminar = []
+
+    for i, iteracion in enumerate(lista):
+        if t == iteracion[1]:
+            indices_a_eliminar.append(i)
+            tanques_utilizar = iteracion[0]
+            tipo_uva = iteracion[2]
+            eliminar_tanques(tanques_utilizar, tipo_uva)
+
+    # Eliminar sublistas en orden inverso para evitar problemas con los índices
+    for index in reversed(indices_a_eliminar):
+        lista.pop(index)
+
+    return lista
+
 
 ### Para calcular los coeficientes llamar a la funcion "calcular_coeficientes_parabola(q_t_minus, q_t_plus)" siendo
 ### el q_t_minus = q[t-7] y el otro q[t+7].
@@ -152,15 +290,15 @@ def simular():
     litros_C5 = 0
     litros_C6 = 0
     columna = 0
-
-    for t in range(50, 160):
+    lista_fermentacion = []
+    for t in range(50, 150):
         uva_C1_hoy = 0
         uva_C2_hoy = 0
         uva_C3_hoy = 0
         uva_C4_hoy = 0
         uva_C5_hoy = 0
         uva_C6_hoy = 0
-
+        lista_fermentacion = sacar_tanques(lista_fermentacion, t)
         for lote in lotes:
             lote_id, lote_cod, lote_numero, lote_tipo_uva, lote_toneladas, lote_dia_optimo, lote_prob_seco_lluvia, lote_prob_lluvia_lluvia, lote_precio_usd = lote
             if t == lote_dia_optimo:
@@ -169,54 +307,66 @@ def simular():
                 q_menos_7 = calidad_lote[0]
                 q_mas_7 = calidad_lote[1]
                 calidad_lote, t_optimal = calidad_final(q_menos_7, q_mas_7)
-                print(f'lote: {lote_cod}')
-                print(lote_dia_optimo)
-                print(t_optimal)
+                #print(f'lote: {lote_cod}')
+                #print(f't = {t}')
                 lote_dia_optimo += t_optimal
-                print(lote_dia_optimo)
-                print(calidad_lote)
                 umbral_calidad_uva = umbral_uva(lote_tipo_uva)
                 if calidad_lote >= umbral_calidad_uva:
                     #Calidad en buen estado, pasa a fermentacion
                     kilos_lote = lote_toneladas*1000
-                    litros_vino = kilos_lote*0.5
-                    litros_totales += litros_vino
+                    litros_vin = kilos_lote*0.5
+                    litros_totales += litros_vin
+                    litros_restantes, tanques_utilizar = conversion_lt_tanque(litros_vin)
+                    litros_restantes_uva(litros_restantes, lote_tipo_uva)
+                    #print(litros_restantes_uvas)
+                    tanques_utilizar, tanques_espera = uso_tanques(tanques_utilizar)
+                    #print(uso_plantas)
+                    dias_tanque = t + calcular_duracion_vinificacion()
+                    if tanques_utilizar > 0:
+                        lista_fermentacion.append([tanques_utilizar, dias_tanque, lote_tipo_uva])
+                    litros_sobrantes = 25000*tanques_espera
+                    litros_vino(litros_sobrantes, lote_tipo_uva)
+                    ### supuesto: cuando no hay espacio en fermentación, y cuando en un lote sobran litros de uva que no 
+                    ### pueden ser introducidos a un tanque, estas sobras no se consideran en la simulación.
                     if lote_tipo_uva == "C1":
-                        litros_C1 += litros_vino
+                        litros_C1 += litros_vin
                         botellas_C1 = litros_C1/0.75
-                        uva_C1_hoy += litros_vino
+                        uva_C1_hoy += litros_vin
 
                     elif lote_tipo_uva == "C2":
-                        litros_C2 += litros_vino
+                        litros_C2 += litros_vin
                         botellas_C2 = litros_C2/0.75
-                        uva_C2_hoy += litros_vino
+                        uva_C2_hoy += litros_vin
 
                     elif lote_tipo_uva == "C3":
-                        litros_C3 += litros_vino
+                        litros_C3 += litros_vin
                         botellas_C3 = litros_C3/0.75
-                        uva_C3_hoy += litros_vino
+                        uva_C3_hoy += litros_vin
 
                     elif lote_tipo_uva == "C4":
-                        litros_C4 += litros_vino
+                        litros_C4 += litros_vin
                         botellas_C4 = litros_C4/0.75
-                        uva_C4_hoy += litros_vino
+                        uva_C4_hoy += litros_vin
 
                     elif lote_tipo_uva == "C5":
-                        litros_C5 += litros_vino
+                        litros_C5 += litros_vin
                         botellas_C5 = litros_C5/0.75
-                        uva_C5_hoy += litros_vino
+                        uva_C5_hoy += litros_vin
 
                     elif lote_tipo_uva == "C6":
-                        litros_C6 += litros_vino
+                        litros_C6 += litros_vin
                         botellas_C6 = litros_C6/0.75
-                        uva_C6_hoy += litros_vino
+                        uva_C6_hoy += litros_vin
+                    
 
+
+                    
 
 
 
                     
 
-                    pass
+
                 elif umbral_calidad_uva > calidad_lote >= 0.5:
                     # Calidad piola, se recupera 30%
                     pass
@@ -226,34 +376,23 @@ def simular():
                 
             else:
                 pass
-
         lista_diaria = [uva_C1_hoy,uva_C2_hoy,uva_C3_hoy,uva_C4_hoy,uva_C5_hoy,uva_C6_hoy]
         columna += 1
         for index, value in enumerate(lista_diaria, start=1):
             ws.cell(row=index, column=columna, value=value)
-        wb.save('archivo_excel.xlsx')
+        '''wb.save('archivo_excel.xlsx')'''
 
-
-
-
-        '''
-        # Calcular predicción climática
-        dia_optimo_prediccion, tipo_3 = predecir_clima(lote_dia_optimo, lote_prob_seco_lluvia, lote_prob_lluvia_lluvia)
-        
-        # Imprimir resultados
-        print(f"Lote: {lote_cod}")
-        # en dia_optimo_prediccion[12] está el día óptimo
-        print(f"Predicción climática: {dia_optimo_prediccion}")
-        print(f'prediccion tipo 3: {tipo_3}')'''
-
-
-
+    print(f'litros vino: {litros_vino_uvas}')
+    print(f'litros sobrantes: {litros_restantes_uvas}')
+    suma = sum(litros_vino_uvas) + sum(litros_restantes_uvas)
+    print(f'litros totales> {suma}')
+    print(f'litros que se usaran:{sum(litros_vino_uvas)}')
+    print(f'litros que sobraron:{sum(litros_restantes_uvas)}')
     botellas_mercado_A = botellas_C5
     botellas_mercado_B = botellas_C3 + botellas_C1
     botellas_mercado_C = botellas_C2
     botellas_mercado_D = botellas_C4 + botellas_C6
-
-    print(f"la cantidad de litros será {litros_totales}")
+    '''print(f"la cantidad de litros será {litros_totales}")
     botellas = litros_totales/0.75
     print(f"la cantidad de botellas totales a producir es {botellas}")
     print(f"para C1 hay {litros_C1} litros y {botellas_C1} botellas")
@@ -264,9 +403,7 @@ def simular():
     print(f"para C6 hay {litros_C6} litros y {botellas_C6} botellas")
     print(f"para el mercado A se tiene {botellas_mercado_A}, para el mercado B se tiene {botellas_mercado_B}")
     print(f"para el C tenemos {botellas_mercado_C} y finalmente para el mercado D se logra producir{botellas_mercado_D}")
-    print(f'contador: {contador}')
-
-
+    print(f'contador: {contador}')'''
     conn.close()
 
 # Ejecutar la simulación
