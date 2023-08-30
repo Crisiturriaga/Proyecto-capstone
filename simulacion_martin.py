@@ -392,7 +392,7 @@ def simular():
     botellas_mercado_B = botellas_C3 + botellas_C1
     botellas_mercado_C = botellas_C2
     botellas_mercado_D = botellas_C4 + botellas_C6
-    '''print(f"la cantidad de litros será {litros_totales}")
+    print(f"la cantidad de litros será {litros_totales}")
     botellas = litros_totales/0.75
     print(f"la cantidad de botellas totales a producir es {botellas}")
     print(f"para C1 hay {litros_C1} litros y {botellas_C1} botellas")
@@ -403,7 +403,7 @@ def simular():
     print(f"para C6 hay {litros_C6} litros y {botellas_C6} botellas")
     print(f"para el mercado A se tiene {botellas_mercado_A}, para el mercado B se tiene {botellas_mercado_B}")
     print(f"para el C tenemos {botellas_mercado_C} y finalmente para el mercado D se logra producir{botellas_mercado_D}")
-    print(f'contador: {contador}')'''
+    print(f'contador: {contador}')
     conn.close()
 
 # Ejecutar la simulación
