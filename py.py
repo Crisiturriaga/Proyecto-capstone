@@ -43,7 +43,7 @@ def sacar_tanques(lista, t):
         if t == iteracion[1]:
             indices_a_eliminar.append(i)
             tanques_utilizar = iteracion[0]
-            eliminar_tanques(tanques_utilizar)
+            #eliminar_tanques(tanques_utilizar)
 
     # Eliminar sublistas en orden inverso para evitar problemas con los índices
     for index in reversed(indices_a_eliminar):
@@ -113,3 +113,57 @@ def utilizar_tanques(disponibilidad, litros_vino):
         elif disponibilidad == 0:
             # mantener en espera hasta que se desocupe un tanque
             pass
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Given points
+t_minus_7 = -7
+t_plus_7 = 7
+q_t_minus_7 = 0.93
+q_t_plus_7 = 0.94
+
+# Vertex point
+t_vertex = 0
+q_vertex = 1
+
+# Set up the equations to solve for coefficients a, b, and c
+A = np.array([
+    [t_minus_7**2, t_minus_7, 1],
+    [t_vertex**2, t_vertex, 1],
+    [t_plus_7**2, t_plus_7, 1]
+])
+
+b = np.array([q_t_minus_7, q_vertex, q_t_plus_7])
+
+# Solve the equations
+coefficients = np.linalg.solve(A, b)
+a, b, c = coefficients
+
+# Quality function
+def quality_function(t):
+    return max(min(a * t**2 + b * t + c, 1), 0)
+
+# Datos de las distribuciones normales
+calidades = [[0.85, 0.95],[0.92, 0.93],[0.91, 0.87],[0.95, 0.95],[0.85, 0.85],[0.93, 0.94]]
+
+# Generate data for plotting
+t_values = np.linspace(-10, 10, 400)
+q_values = [quality_function(t) for t in t_values]
+
+# Plot the function and the normal distributions
+plt.plot(t_values, q_values, label='Distribución normal')
+plt.scatter([t_minus_7, t_plus_7], [q_t_minus_7, q_t_plus_7], color='red', label='Puntos extremos')
+
+for cal in calidades:
+    mean = (cal[0] + cal[1]) / 2
+    std = (cal[1] - cal[0]) / 6  # Just an example std, you can adjust this
+    t_norm = np.linspace(cal[0] - 0.1, cal[1] + 0.1, 400)
+    q_norm = np.exp(-0.5 * ((t_norm - mean) / std)**2)
+    plt.plot(t_norm, q_norm, label=f'Normal({mean:.2f}, {std:.2f})')
+
+plt.xlabel('t=Días')
+plt.ylabel('q[t]=Calidad del día de cosecha t')
+plt.title('Función de calidad C6')
+plt.legend()
+plt.grid()
+plt.show()
