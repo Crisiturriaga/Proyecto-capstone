@@ -31,7 +31,7 @@ def quality_function(t, coefficients):
     return max(min(a * t**2 + b * t + c, 1), 0)
 
 # Generate data for plotting
-t_values = np.linspace(-30, 30, 400)
+t_values = np.linspace(-7, 7, 400)
 
 # Create the figure and axes
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -50,7 +50,7 @@ ax.set_ylabel('q[t]=Calidad del día de cosecha t')
 ax.set_title('Función de calidad de uvas')
 
 # Set limits and grid
-ax.set_xlim(-30, 30)
+ax.set_xlim(-7, 7)
 ax.set_ylim(0, 1.2)
 ax.grid()
 
