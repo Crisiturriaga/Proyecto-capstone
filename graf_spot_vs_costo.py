@@ -15,7 +15,6 @@ plt.xlabel('Porcentaje de compra spot')
 plt.ylabel('Costos (en millones)')
 plt.grid(True)
 
-# Formatear el eje y para mostrar los valores en millones
 plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:.0f}M'))
 
 # Guardar el gráfico en un archivo (por ejemplo, en formato PNG)
