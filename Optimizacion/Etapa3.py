@@ -1,90 +1,85 @@
-import gurobipy as gp
-from gurobipy import GRB
+from gurobipy import Model, GRB
 
-# Crear el modelo
-model = gp.Model("Optimización de Calidad de Lotes")
+# Creación del modelo
+m = Model("OptimizacionCosechaLotes")
 
-# Conjuntos
-S = ...  # Conjunto de lotes comprados con spot
-F = ...  # Conjunto de lotes comprados con forward
-L = ...  # Conjunto de todos los lotes
+# Índices
+S = [...]  # Conjunto de lotes comprados con spot
+F = [...]  # Conjunto de lotes comprados con forward
+L = [...]  # Conjunto de todos los lotes
+T = [...]  # Periodos
+C = [...]  # Cepas
 
 # Parámetros
-r = ...  # Rendimiento del lote l
-d = ...  # Día óptimo de cosecha del lote l
-d_c = ...  # Cantidad de cepa c requerida
-u_c = ...  # Umbral de industrialización de cepa c
-h = ...  # 1 si el lote l es de cepa c
-M = ...  # Un valor grande que actúa como cota superior
+r_l = {...}  # Rendimiento del lote l
+d_l = {...}  # Día óptimo de cosecha del lote l
+d_c = {...}  # Cantidad de cepa c requerida
+u_c = {...}  # Umbral de industrialización de cepa c
+h_lc = {...} # 1 si el lote l es de cepa c
+xi = {...}   # Debes definir xi para cada t
+xi_hat = {...} # Debes definir xi_hat para cada t
+a, b, c = ... , ... , ...  # Coeficientes de la función cuadrática
 
-# Variables de decisión
-x = {}  # 1 si el lote l es enviado a la planta en el período t
-xd = {}  # 1 si el lote l es desechado en el período t
-y = {}  # 1 si el lote l se cosecha en el período t
-z = {}  # 1 si la calidad del lote l es mayor al umbral u_l
-v = {}  # 1 si la calidad del lote l es menor al umbral u_l
-q = {}  # Calidad del lote l en el período t
+# Variables de Decisión
+x_lt = m.addVars(L, T, vtype=GRB.BINARY, name="x")
+xd_lt = m.addVars(L, T, vtype=GRB.BINARY, name="xd")
+y_lt = m.addVars(L, T, vtype=GRB.BINARY, name="y")
+z_l = m.addVars(L, vtype=GRB.BINARY, name="z")
+dc_l = m.addVars(L, vtype=GRB.CONTINUOUS, name="dc")
+w_ct = m.addVars(C, T, vtype=GRB.CONTINUOUS, name="w")
+v_l = m.addVars(L, vtype=GRB.BINARY, name="v")
+q_lt = m.addVars(L, T, vtype=GRB.CONTINUOUS, name="q")
+q_prime_lt = m.addVars(L, T, vtype=GRB.CONTINUOUS, name="q_prime")
 
-# Crear variables de decisión en el modelo
-for l in L:
-    for t in T:
-        x[l, t] = model.addVar(vtype=GRB.BINARY, name=f"x_{l}_{t}")
-        xd[l, t] = model.addVar(vtype=GRB.BINARY, name=f"xd_{l}_{t}")
-        y[l, t] = model.addVar(vtype=GRB.BINARY, name=f"y_{l}_{t}")
-        z[l] = model.addVar(vtype=GRB.BINARY, name=f"z_{l}")
-        v[l] = model.addVar(vtype=GRB.BINARY, name=f"v_{l}")
-        q[l, t] = model.addVar(vtype=GRB.CONTINUOUS, name=f"q_{l}_{t}")
-
-# Actualizar el modelo para agregar las variables
-model.update()
+# Función Objetivo
+m.setObjective(sum(q_lt[l, t] for l in L for t in T), GRB.MAXIMIZE)
 
 # Restricciones
 for l in S:
-    model.addConstr(d[l] - d_c[l] == 2, name=f"Rest1_{l}")
+    m.addConstr(d_l[l] - dc_l[l] == 2, name=f"restr1_{l}")
 
 for l in F:
-    model.addConstr(d[l] - d_c[l] >= 5, name=f"Rest2_{l}")
+    m.addConstr(d_l[l] - dc_l[l] >= 5, name=f"restr2_{l}")
 
 for l in L:
-    model.addConstr(gp.quicksum(x[l, t] + xd[l, t] for t in T) == 1, name=f"Rest3_{l}")
+    m.addConstr(sum(x_lt[l, t] + xd_lt[l, t] for t in T) == 1, name=f"restr3_{l}")
 
-model.addConstr(gp.quicksum(y[l, t] for l in L for t in T) == 290, name="Rest4")
+m.addConstr(sum(y_lt[l, t] for l in L for t in T) == 290, name="restr4")
 
 for c in C:
     for t in T:
-        model.addConstr(
-            gp.quicksum(y[l, t] * r[l] * h[l, c] * z[l] for l in L) == w[c, t], name=f"Rest5_{c}_{t}"
-        )
+        m.addConstr(sum(y_lt[l, t] * r_l[l] * h_lc[l, c] * z_l[l] for l in L) == w_ct[c, t], name=f"restr5_{c}_{t}")
 
 for c in C:
-    model.addConstr(
-        gp.quicksum(x[l, t] * h[l, c] for l in L for t in T) >= d_c[c], name=f"Rest6_{c}"
-    )
+    m.addConstr(sum(x_lt[l, t] * h_lc[l, c] for l in L for t in T) >= d_c[c], name=f"restr6_{c}")
 
 for l in L:
-    model.addConstr(
-        (u_c * h[l, c] - q[l, d_c[l]]) * z[l] >= 0, name=f"Rest7_{l}"
-    )
+    m.addConstr((u_c[c] * h_lc[l, c] - q_lt[l, dc_l[l]]) * z_l[l] >= 0, name=f"restr7_{l}")
 
+M = 1000  # Valor grande para la restricción
 for l in L:
-    model.addConstr(
-        v[l] * M >= z[l], name=f"Rest8_{l}"
-    )
+    m.addConstr(v_l[l] * M >= z_l[l], name=f"restr8_{l}")
 
 for c in C:
     for t in T:
-        model.addConstr(
-            gp.quicksum(y[l, t] * r[l] * h[l, c] * v[l] for l in L) == xd[l, t], name=f"Rest9_{c}_{t}"
-        )
+        m.addConstr(sum(y_lt[l, t] * r_l[l] * h_lc[l, c] * v_l[l] for l in L) == xd_lt[l, t], name=f"restr9_{c}_{t}")
 
+# Restricciones de linearización para q_lt
 for l in L:
     for t in T:
-        model.addConstr(
-            q[l, t] == gp.max_(gp.min_(at[t] ** 2 + bt[t] + c[t], 1), 0), name=f"Rest10_{l}_{t}"
-        )
+        m.addConstr(q_prime_lt[l, t] <= (a*t**2 + b*t + c) * (1 - xi[t]) * (1 - xi[t-1]) * (1 - xi[t-2]) * (1 - sum(xi_hat[theta] for theta in range(1, t-2))) * (1 - sum(xi_hat[theta] for theta in range(1, t))), name=f"restr10_{l}_{t}")
+        m.addConstr(q_prime_lt[l, t] <= 1, name=f"restr11_{l}_{t}")
+        m.addConstr(q_lt[l, t] >= q_prime_lt[l, t], name=f"restr12_{l}_{t}")
+        m.addConstr(q_lt[l, t] >= 0, name=f"restr13_{l}_{t}")
 
-# Función objetivo
-model.setObjective(gp.quicksum(q[l, t] for l in L for t in T), GRB.MAXIMIZE)
+# Resolver el modelo
+m.optimize()
 
-# Optimizar el modelo
-model.optimize()
+# Imprimir solución (esto es opcional)
+if m.status == GRB.OPTIMAL:
+    for l in L:
+        for t in T:
+            print(f"x_{l}_{t}:", x_lt[l, t].x)
+            print(f"xd_{l}_{t}:", xd_lt[l, t].x)
+            print(f"y_{l}_{t}:", y_lt[l, t].x)
+

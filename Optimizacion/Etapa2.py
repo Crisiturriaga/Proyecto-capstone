@@ -1,29 +1,33 @@
-import gurobipy as gp
+from gurobipy import Model, GRB
 
-# Conjuntos
-L = range(1, num_lotes + 1)
-T = range(1, num_periodos + 1)
+# Creación del modelo
+m = Model("OptimizacionCompraLotes")
+
+# Índices
+L = [...]  # Debes definir los elementos del conjunto de lotes
+T = [...]  # Debes definir los elementos del conjunto de periodos
 
 # Parámetros
-q = {}  # Calidad del lote en cada periodo
-c = {}  # Costo por kilo de uva de lote
-r = {}  # Riesgo de comprar el lote con contrato forward
+q_lt = {...}  # Debes definir los valores para cada l y t
+c_l = {...}   # Debes definir los valores para cada l
+r_l = {...}   # Debes definir los valores para cada l
 
-
-# Crear el modelo
-model = gp.Model()
-
-# Variables de decisión
-x_spot = model.addVars(L, vtype=gp.GRB.BINARY, name="x_spot")  # Variable binaria: 1 si el lote l se compra con contrato spot, 0 en otro caso
-x_forward = model.addVars(L, vtype=gp.GRB.BINARY, name="x_forward")  # Variable binaria: 1 si el lote l se compra con contrato forward, 0 en otro caso
-forward_quantity = model.addVars(L, T, name="forward_quantity")  # Cantidad de lote l en el período t con contrato forward
-
+# Variables de Decisión
+x_spot_l = m.addVars(L, vtype=GRB.BINARY, name="x_spot")
+x_forward_l = m.addVars(L, vtype=GRB.BINARY, name="x_forward")
 
 # Función Objetivo
-model.setObjective(quicksum(c[l] * (x_spot[l] * q[l, t] + x_forward[l] * 0.8 * r[l]) for l in L for t in T), GRB.MINIMIZE)
+m.setObjective(sum(c_l[l] * (x_spot_l[l] * q_lt[l, t] + x_forward_l[l] * 0.8 * r_l[l]) for l in L for t in T), GRB.MINIMIZE)
+
 # Restricciones
 for l in L:
-    model.addConstr(x_spot[l] + x_forward[l] == 1, name=f'restriccion1_{l}')
+    m.addConstr(x_spot_l[l] + x_forward_l[l] == 1, name=f"restr1_{l}")
 
 # Resolver el modelo
-model.optimize()
+m.optimize()
+
+# Imprimir solución (esto es opcional)
+if m.status == GRB.OPTIMAL:
+    for l in L:
+        print(f"x_spot_{l}:", x_spot_l[l].x)
+        print(f"x_forward_{l}:", x_forward_l[l].x)

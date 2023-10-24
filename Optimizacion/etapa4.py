@@ -1,172 +1,115 @@
-import gurobipy as gp
-from gurobipy import GRB
+from gurobipy import Model, GRB
 
-# Crear el modelo
-model = gp.Model("Optimizacion de Tanques y Lotes")
+# Creación del modelo
+m = Model("OptimizacionFermentacion")
 
-# Conjuntos
-P = ...  # Conjunto de plantas disponibles
-E = ...  # Conjunto de tanques disponibles en cada planta
-T = ...  # Conjunto de los días a optimizar
-J = ...  # Conjunto de lotes aptos para la industrialización
-E_ad = ...  # Conjunto de tanques adicionales que se pueden contratar
+# Índices
+P = [...]  # Conjunto de las plantas disponibles
+E = [...]  # Conjunto de tanques disponibles en cada planta
+T = [...]  # Conjunto de los días a optimizar
+J = [...]  # Conjunto de lotes aptos para la industrizlización
+E_ad = [...]  # Conjunto de tanques adicionales que se pueden contratar
+C = [...]  # Cepas
 
 # Parámetros
-u = ...  # Cantidad de uva de lote j a recibir en día t
-h = ...  # 1 si el lote j es de cepa c
-C = ...  # Capacidad máxima de tanque e en planta p
-Cmin = ...  # Capacidad mínima para que se active el tanque e en planta p
-T_promedio = ...  # Tiempo promedio de fermentación del tanque e
-q = ...  # Calidad de la uva de lote j por recibir en t
+u_jt = {...}  # Cantidad de uva de lote j a recepcionar en día t
+h_jc = {...}  # 1 si el lote j es de cepa c
+C_ep = {...}  # Capacidad máxima de tanque e en planta p
+Cmin_ep = {...}  # Capacidad mínima para que se active el tanque e en planta p
+T_e = {...}  # Tiempo promedio de fermentación del tanque e
+q_jt = {...}  # Calidad de la uva de lote j por recepcionar en t
 C1 = ...  # Costo por arrendar tanques adicionales durante la temporada
 B = ...  # Umbral de calidad de uva que no requiere rectificar
 C_trans = ...  # Costo de almacenamiento en transporte por día
 C_rect = ...  # Costo de rectificación de un tanque
-U = ...  # Capacidad de almacenamiento en planta p (litros de vino)
-R = ...  # Pérdida de calidad de la uva por día de espera en camión en el día t
-H = ...  # Cantidad de uva en kg por lote j
-D = ...  # Día en que lote j está listo para ser recibido
-C_ad = ...  # Define la capacidad de los tanques adicionales que se pueden contratar en cada planta p
-C_jt = ...  # Costo de desechar un lote j en base a la calidad t
+U_p = {...}  # Capacidad de almacenamiento en planta p (litros de vino)
+R_t = {...}  # Pérdida de calidad de la uva por día de espera en camión en el día t
+H_j = {...}  # cantidad de uva en kg por lote j
+D_j = {...}  # Día en que lote j está listo para recepcionarse
+C_eadp = {...}  # Define la capacidad de los tanques adicionales que se pueden contratar en cada planta p
+C_jt = {...}  # costo de desechar un lote j en base a la calidad t
 
-# Variables de decisión
-t = {}  # Variable binaria: 1 si lote j se guarda en transporte para el día t, 0 e.o.c
-s = {}  # Variable binaria: 1 si lote j se recibe para el día t, 0 e.o.c
-r = {}  # Variable binaria: 1 si se rectifica el tanque e en el día t
-e = {}  # Variable binaria: 1 si se contrata un tanque adicional en la planta p en el día t
-y = {}  # Variable binaria: 1 si el tanque e está lleno o no en el día t
-v = {}  # Cantidad de vino de lote j enviado a la planta p y al tanque e en día t
-d = {}  # Día en que el lote j entra a tanque t
-b = {}  # Variable binaria: 1 si el contenido de la planta p del tanque e se rectifica en el día t
-x = {}  # Cantidad de uva del lote j enviada a la planta p en el tanque e en el día t
-ql = {}  # Calidad en planta p en el tanque e en el día t
-Q = {}  # Calidad final del lote j al entrar a procesamiento en el día t
-z = {}  # Variable binaria: 1 si el lote j de la cepa c se almacena en el tanque e en la planta p en el día t
+# Variables de Decisión
+t_jt = m.addVars(J, T, vtype=GRB.BINARY, name="t")
+s_jt = m.addVars(J, T, vtype=GRB.BINARY, name="s")
+r_et = m.addVars(E, T, vtype=GRB.BINARY, name="r")
+e_pt = m.addVars(P, T, vtype=GRB.BINARY, name="e")
+y_et = m.addVars(E, T, vtype=GRB.BINARY, name="y")
+v_jpet = m.addVars(J, P, E, T, vtype=GRB.CONTINUOUS, name="v")
+d_jt = m.addVars(J, T, vtype=GRB.CONTINUOUS, name="d")
+b_pet = m.addVars(P, E, T, vtype=GRB.BINARY, name="b")
+x_jpet = m.addVars(J, P, E, T, vtype=GRB.CONTINUOUS, name="x")
+ql_pet = m.addVars(P, E, T, vtype=GRB.CONTINUOUS, name="ql")
+Q_jt = m.addVars(J, T, vtype=GRB.CONTINUOUS, name="Q")
+z_jpetc = m.addVars(J, P, E, T, C, vtype=GRB.BINARY, name="z")
 
-# Crear variables de decisión en el modelo
-for j in J:
-    for t in T:
-        t[j, t] = model.addVar(vtype=GRB.BINARY, name=f"t_{j}_{t}")
-        s[j, t] = model.addVar(vtype=GRB.BINARY, name=f"s_{j}_{t}")
-        Q[j, t] = model.addVar(vtype=GRB.CONTINUOUS, name=f"Q_{j}_{t}")
-
-for e in E:
-    for t in T:
-        r[e, t] = model.addVar(vtype=GRB.BINARY, name=f"r_{e}_{t}")
-        y[e, t] = model.addVar(vtype=GRB.BINARY, name=f"y_{e}_{t}")
-
-for p in P:
-    for t in T:
-        e[p, t] = model.addVar(vtype=GRB.BINARY, name=f"e_{p}_{t}")
-
-for j in J:
-    for p in P:
-        for e in E:
-            for t in T:
-                v[j, p, e, t] = model.addVar(vtype=GRB.CONTINUOUS, name=f"v_{j}_{p}_{e}_{t}")
-                d[j, t] = model.addVar(vtype=GRB.CONTINUOUS, name=f"d_{j}_{t}")
-                x[j, p, e, t] = model.addVar(vtype=GRB.CONTINUOUS, name=f"x_{j}_{p}_{e}_{t}")
-                ql[p, e, t] = model.addVar(vtype=GRB.CONTINUOUS, name=f"ql_{p}_{e}_{t}")
-
-for c in C:
-    for j in J:
-        for t in T:
-            z[j, c, p, e, t] = model.addVar(vtype=GRB.BINARY, name=f"z_{j}_{c}_{p}_{e}_{t}")
-
-# Actualizar el modelo para agregar las variables
-model.update()
+# Función Objetivo
+m.setObjective(sum(C_rect * r_et[e, t] for e in E for t in T) + sum(C1 * e_pt[p, t] for p in P for t in T) + sum(C_trans * t_jt[j, t] * H_j[j] for j in J for t in T) + sum(C_jt[j, t] * (1 - t_jt[j, t]) for j in J for t in T), GRB.MINIMIZE)
 
 # Restricciones
 for j in J:
     for t in T:
-        model.addConstr(Q[j, t] == q[j, t] - (d[j, t] - D[j]) * R[t], f"Rest1_{j}_{t}")
+        m.addConstr(Q_jt[j, t] == q_jt[j, t] - (d_jt[j, t] - D_j[j]) * R_t[t], name=f"restr1_{j}_{t}")
 
 for j in J:
     for t in T:
-        model.addConstr(t[j, t] + s[j, t] <= 1, f"Rest2_{j}_{t}")
+        m.addConstr(t_jt[j, t] + s_jt[j, t] <= 1, name=f"restr2_{j}_{t}")
 
 for p in P:
     for j in J:
         for t in T:
-            for c in C:
-                model.addConstr(
-                    quicksum(x[j, p, e, t] * h[j, c] for e in E) == u[j, t], f"Rest3_{p}_{j}_{t}_{c}"
-                )
+            m.addConstr(sum(x_jpet[j, p, e, t] for e in E) * s_jt[j, t] == u_jt[j, t], name=f"restr3_{p}_{j}_{t}")
 
 for j in J:
     for t in T:
-        model.addConstr(
-            0.5 * quicksum(x[j, p, e, t] for p in P for e in E) == quicksum(v[j, p, e, t] for p in P for e in E),
-            f"Rest4_{j}_{t}",
-        )
+        m.addConstr(0.5 * sum(x_jpet[j, p, e, t] for p in P for e in E) == sum(v_jpet[j, p, e, t] for p in P for e in E), name=f"restr4_{j}_{t}")
+
+for c in C:
+    for p in P:
+        for e in E:
+            for t in T:
+                m.addConstr(z_jpetc[j, p, e, t, c] == 1, name=f"restr5_{c}_{p}_{e}_{t}")
 
 for p in P:
     for e in E:
         for t in T:
-            model.addConstr(quicksum(z[j, c, p, e, t] for j in J for c in C) == 1, f"Rest5_{p}_{e}_{t}")
+            m.addConstr(sum(v_jpet[j, p, e, t] for j in J) <= C_ep[e, p] * y_et[e, t], name=f"restr6_{p}_{e}_{t}")
 
 for p in P:
     for e in E:
         for t in T:
-            model.addConstr(
-                quicksum(v[j, p, e, t] for j in J for c in C) <= C[e, p] * y[e, t], f"Rest6_{p}_{e}_{t}"
-            )
+            m.addConstr(sum(v_jpet[j, p, e, t] for j in J) >= Cmin_ep[e, p] * y_et[e, t], name=f"restr7_{p}_{e}_{t}")
 
 for p in P:
     for e in E:
         for t in T:
-            model.addConstr(
-                quicksum(v[j, p, e, t] for j in J for c in C) >= Cmin[e, p] * y[e, t], f"Rest7_{p}_{e}_{t}"
-            )
-
-for p in P:
-    for e in E:
-        for t in T:
-            model.addConstr(y[e, t] <= quicksum(v[j, p, e, t] for j in J for c in C), f"Rest8_{p}_{e}_{t}")
+            m.addConstr(y_et[e, t] <= sum(v_jpet[j, p, e, t] for j in J), name=f"restr8_{p}_{e}_{t}")
 
 for p in P:
     for j in J:
         for t in T:
-            model.addConstr(quicksum(v[j, p, e, t] for e in E for c in C) <= U[p], f"Rest9_{p}_{j}_{t}")
+            m.addConstr(sum(v_jpet[j, p, e, t] for e in E) <= U_p[p], name=f"restr9_{p}_{j}_{t}")
 
 for p in P:
     for e in E:
         for t in T:
-            model.addConstr(
-                ql[p, e, t]
-                == (quicksum(x[j, p, e, t] * Q[j, t] for j in J) / quicksum(x[j, p, e, t] for j in J)),
-                f"Rest10_{p}_{e}_{t}",
-            )
+            m.addConstr(ql_pet[p, e, t] == sum(x_jpet[j, p, e, t] * Q_jt[j, t] for j in J) / sum(x_jpet[j, p, e, t] for j in J), name=f"restr10_{p}_{e}_{t}")
 
 for p in P:
     for e in E:
         for t in T:
-            model.addConstr(ql[p, e, t] <= B + M * (1 - r[e, t]), f"Rest11_{p}_{e}_{t}")
+            m.addConstr(ql_pet[p, e, t] <= B + (1 - r_et[e, t]), name=f"restr11_{p}_{e}_{t}")
 
 for p in P:
     for t in T:
-        model.addConstr(
-            quicksum(C[e, p] * y[e, t] for e in E) + quicksum(C_ad[e_ad] * e[p, t] for e_ad in E_ad) >=
-            quicksum(v[j, p, e, t] for j in J),
-            f"Rest12_{p}_{t}",
-        )
+        m.addConstr(sum(C_ep[e, p] * y_et[e, t] for e in E) + sum(C_eadp[e_ad, p] * e_pt[p, t] for e_ad in E_ad) >= sum(v_jpet[j, p, e, t] for j in J for e in E), name=f"restr12_{p}_{t}")
 
-# Función objetivo
-obj = (
-        quicksum(
-            C_rect * r[e, t] for e in E for t in T
-        )
-        + quicksum(
-    C1 * e[p, t] for p in P for t in T
-)
-        + quicksum(
-    C_trans * t[j, t] * H[j] for j in J for t in T
-)
-        + quicksum(
-    C_desecho * (1 - t[j, t]) for j in J for t in T
-)
-)
-model.setObjective(obj, GRB.MINIMIZE)
+# Resolver el modelo
+m.optimize()
 
-# Optimizar el modelo
-model.optimize()
+# Imprimir solución (esto es opcional)
+if m.status == GRB.OPTIMAL:
+    for j in J:
+        for t in T:
+            print(f"t_{j}_{t}:", t_jt[j, t].x)
+            print(f"s_{j}_{t}:", s_jt[j, t].x)

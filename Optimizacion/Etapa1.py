@@ -1,45 +1,64 @@
-import gurobipy as gp
+from gurobipy import Model, GRB
 
-# Conjuntos
-M = [A,B,C,D]
-C = [C1,C2,C3,C4,C5,C6]
-B = [Blend1, Blend2, Blend3, Blend4]
-I = range(1, num_recetas + 1)
+# Leer base de datos y crear una lista de listas con la data
+import pandas as pd
+df = pd.read_csv('datos.csv')
+lista_de_listas = df.values.tolist()
+print(lista_de_listas)
 
-# Crear el modelo
-model = gp.Model()
-# Variables de decisión
-x = model.addVars(I, B, vtype=gp.GRB.BINARY, ame="x")  # Variable binaria para indicar si se hace la receta i del blend b
-y = model.addVars(C, B, name="y")  # Cantidad de kilos de cepa c a comprar para el blend b
-z = model.addVars(C, name="z")  # Cantidad de kilos de cepa c a comprar para varietal de cepa c
-v = model.addVars(C, I, B, name="v")  # Cantidad de kilos de cepa c a comprar para hacer receta i del blend b
+# Creación del modelo
+m = Model("OptimizacionUvas")
+
+# Índices
+M = [...]  # Debes definir los elementos del conjunto de mercados
+C = [...]  # Debes definir los elementos del conjunto de cepas
+B = [...]  # Debes definir los elementos del conjunto de blends
+I = [...]  # Debes definir los elementos del conjunto de recetas por blend
+
+# Parámetros
+d_mc = {...}  # Debes definir los valores para cada m y c
+d_mb = {...}  # Debes definir los valores para cada m y b
+c_c = {...}   # Debes definir los valores para cada c
+r_cib = {...} # Debes definir los valores para cada c, i y b
+
+# Variables de Decisión
+x_ib = m.addVars(I, B, vtype=GRB.BINARY, name="x")
+y_cb = m.addVars(C, B, vtype=GRB.CONTINUOUS, name="y")
+z_c = m.addVars(C, vtype=GRB.CONTINUOUS, name="z")
+v_cib = m.addVars(C, I, B, vtype=GRB.CONTINUOUS, name="v")
 
 # Función Objetivo
-model.setObjective(quicksum(c[c] * (z[c] + quicksum(y[c, b] for b in B)) for c in C), GRB.MINIMIZE)
+m.setObjective(sum(c_c[c] * (z_c[c] + sum(y_cb[c, b] for b in B)) for c in C), GRB.MINIMIZE)
 
 # Restricciones
-# la primera restricción garantiza que la cantidad de uvas de cepa c para el vino varietal sea al menos igual a la demanda mínima en todos los mercados m
 for c in C:
-    model.addConstr(z[c] >= quicksum(d[m, c] for m in M), name=f'restriccion1_{c}')
+    m.addConstr(z_c[c] >= sum(d_mc[m, c] for m in M), name=f"restr1_{c}")
 
-#La segunda restricción asegura que la cantidad de uvas de cepa c compradas para el blend b sea al menos igual a la demanda mínima en todos los mercados m.
 for b in B:
-    model.addConstr(quicksum(y[c, b] for c in C) >= quicksum(d[m, b] for m in M), name=f'restriccion2_{b}')
+    m.addConstr(sum(y_cb[c, b] for c in C) >= sum(d_mb[m, b] for m in M), name=f"restr2_{b}")
 
-#La tercera restricción garantiza que la cantidad de cepa c comprada para la receta i del blend b sea igual a la cantidad de cepa requerida para esa receta.
 for i in I:
     for b in B:
-        model.addConstr(quicksum(r[c, i, b] * x[i, b] for c in C) == quicksum(v[c, i, b] for c in C), name=f'restriccion3_{i}_{b}')
-#La cuarta restricción asegura que la cantidad total de uvas de cepa c compradas para el blend b sea igual a la cantidad de uvas de cepa c compradas en total.
+        m.addConstr(sum(r_cib[c, i, b] * x_ib[i, b] for c in C) == sum(v_cib[c, i, b] for c in C), name=f"restr3_{i}_{b}")
+
 for c in C:
     for b in B:
-        model.addConstr(quicksum(v[c, i, b] for i in I) == y[c, b], name=f'restriccion4_{c}_{b}')
-
-
-# Resolver el modelo
-model.optimize()
+        m.addConstr(sum(v_cib[c, i, b] for i in I) == y_cb[c, b], name=f"restr4_{c}_{b}")
 
 # Resolver el modelo
-model.optimize()
+m.optimize()
 
-
+# Imprimir solución (esto es opcional)
+if m.status == GRB.OPTIMAL:
+    for c in C:
+        print(f"z_{c}:", z_c[c].x)
+    for c in C:
+        for b in B:
+            print(f"y_{c}_{b}:", y_cb[c, b].x)
+    for i in I:
+        for b in B:
+            print(f"x_{i}_{b}:", x_ib[i, b].x)
+    for c in C:
+        for i in I:
+            for b in B:
+                print(f"v_{c}_{i}_{b}:", v_cib[c, i, b].x)
