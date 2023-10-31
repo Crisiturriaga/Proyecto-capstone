@@ -197,22 +197,35 @@ for lote in lotes_c6:
     contador_6 += 1
     lotes_finales.append(lote)
 
+
 #En lotes_finales tendremos cada uno de los lotes, donde la ultima columna corresponde a la penalizacion que este tiene
 
-
-
-
-# Crear el modelo
+# Creacion modelo
 model = gp.Model()
 
 # Índices
 L = range(1, 291)
-T = range(1, 6)  # Asumiendo 5 periodos
+T = range(1, 6)  # Hay que cambiar por periodos reales
 
 # Parámetros
 kg = {}  # Kilogramos de uva por lote
 q_expec = {}  # Calidad esperada del lote por lote y período
 r = {}  # Medida de riesgo por lote
+c = {} #costo por lote
+# Poblando los parametros con la lista de lotes obtenida mas arriba
+for l, lote_info in enumerate(lotes_finales, start=1):
+    kg[l] = lote_info[3]*1000 
+    r[l] = lote_info[9] 
+    c[l] = lote_info[7] #costo por kg
+
+#Hay que agregar las calidades para un periodo especifico
+#Creo que va a tener que ser una lista de listas que vaya por cada uno de los lotes 
+#y dentro tenga las calidades que tendría este lote para los diferentes posibles días
+
+    #for t in T:
+        #q_expec[l, t] = lote_info[1][t - 1]  # Calidad esperada del lote por período
+
+
 
 # Definir los parámetros kg, q_expec y r aquí
 
@@ -227,9 +240,10 @@ for l in L:
 
 # Función Objetivo
 model.setObjective(
-    gp.quicksum((x_spot[j, t] * kg[j] * q_expec[j, t] + x_fwd[j] * kg[j] * q_expec[j]) / (1 - r[j] + 0.0000001) for t in T),
+    gp.quicksum((x_spot[j, t] * kg[j] * q_expec[j, t]*c[j] + x_fwd[j] * kg[j] * c[j] * 0.8) / (1 - r[j] + 0.0000001) for t in T),
     sense=gp.GRB.MINIMIZE
 )
+
 # Restricciones
 # Restricción: Un lote se compra una sola vez
 for j in L:
