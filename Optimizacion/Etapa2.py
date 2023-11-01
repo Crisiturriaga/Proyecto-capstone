@@ -15,7 +15,6 @@ for index, row in df.iterrows():
 
     lotes.append(lista_lote)
 
-print(lotes[0])
 
 
 def calcular_probabilidad_lluvia(P_seco_a_lluvioso, P_lluvioso_a_lluvioso):
@@ -84,7 +83,7 @@ def tolerancia_cepa(lotes):
         valor_calidad = valores_calidad[posicion_porcentaje]
         valor_lluvia = valores_lluvia[posicion_porcentaje]
         tolerancia.append(valor_lluvia)
-    return tolerancia, lluvias_cepa           
+    return tolerancia, lluvias_cepa, ponderador_cepa       
 
 
 lotes_def = []
@@ -116,6 +115,16 @@ lluvias_c3 = tolerancia_lluvias[1][2]
 lluvias_c4 = tolerancia_lluvias[1][3]
 lluvias_c5 = tolerancia_lluvias[1][4]
 lluvias_c6 = tolerancia_lluvias[1][5]
+
+ponderador_c1 = tolerancia_lluvias[2][0]
+ponderador_c2 = tolerancia_lluvias[2][1]
+ponderador_c3 = tolerancia_lluvias[2][2]
+ponderador_c4 = tolerancia_lluvias[2][3]
+ponderador_c5 = tolerancia_lluvias[2][4]
+ponderador_c6 = tolerancia_lluvias[2][5]
+
+
+
 
 
 #Se hacen penalizaciones dentro de cada cepa ya que los lotes se afectan de forma diferente segun la cepa
@@ -197,6 +206,16 @@ for lote in lotes_c6:
     contador_6 += 1
     lotes_finales.append(lote)
 
+lista_unida = ponderador_c1 + ponderador_c2 + ponderador_c3 + ponderador_c4 + ponderador_c5 + ponderador_c6
+
+for lote in lotes_finales:
+    lote.append(lista_unida[0])
+    lista_unida.pop(0)
+    tipo_3 = lote[6]*0.05
+    lote.append(tipo_3)
+    q = (1-tipo_3) * lote[10]
+    lote.append(q)
+print(lotes_finales)
 
 #En lotes_finales tendremos cada uno de los lotes, donde la ultima columna corresponde a la penalizacion que este tiene
 
@@ -217,7 +236,10 @@ for l, lote_info in enumerate(lotes_finales, start=1):
     kg[l] = lote_info[3]*1000 
     r[l] = lote_info[9] 
     c[l] = lote_info[7] #costo por kg
+    q_expec[l] = lote_info[12]
 
+
+print(lotes_finales)
 #Hay que agregar las calidades para un periodo especifico
 #Creo que va a tener que ser una lista de listas que vaya por cada uno de los lotes 
 #y dentro tenga las calidades que tendría este lote para los diferentes posibles días
@@ -240,7 +262,7 @@ for l in L:
 
 # Función Objetivo
 model.setObjective(
-    gp.quicksum((x_spot[j, t] * kg[j] * q_expec[j, t]*c[j] + x_fwd[j] * kg[j] * c[j] * 0.8) / (1 - r[j] + 0.0000001) for t in T),
+    gp.quicksum((x_spot[j] * kg[j] * q_expec[j]*c[j] + x_fwd[j] * kg[j] * c[j] * 0.8) / (1 - r[j] + 0.0000001) for t in T),
     sense=gp.GRB.MINIMIZE
 )
 
