@@ -245,8 +245,9 @@ for lote in lotes_finales:
     lote.append(calidad)
 
 ## NOTAR QUE EL ULTIMO VALOR ES LA PARTE CUADRATICA
-print(lotes_finales[0])
-
+for lote in lotes:
+    cal = lote[12]*lote[13]
+    lote.append(cal)
 #En lotes_finales tendremos cada uno de los lotes, donde la ultima columna corresponde a la penalizacion que este tiene
 
 # Creacion modelo
@@ -266,7 +267,7 @@ for l, lote_info in enumerate(lotes_finales, start=1):
     kg[l] = lote_info[3]*1000 
     r[l] = lote_info[9] 
     c[l] = lote_info[7] #costo por kg
-    q_expec[l] = lote_info[12]
+    q_expec[l] = lote_info[14]
 
 
 ###print(lotes_finales)
