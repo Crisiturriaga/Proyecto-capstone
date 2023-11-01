@@ -1,5 +1,5 @@
 import gurobipy as gp
-
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -14,8 +14,6 @@ for index, row in df.iterrows():
     lista_lote = row.tolist()
 
     lotes.append(lista_lote)
-
-
 
 def calcular_probabilidad_lluvia(P_seco_a_lluvioso, P_lluvioso_a_lluvioso):
     # Inicializar probabilidades iniciales según el estado inicial deseado
@@ -215,7 +213,39 @@ for lote in lotes_finales:
     lote.append(tipo_3)
     q = (1-tipo_3) * lote[10]
     lote.append(q)
-print(lotes_finales)
+print(lotes_finales[0])
+calidades =  {'C1': [0.85, 0.95], 'C2': [0.92, 0.93], 'C3': [0.91, 0.87], 'C4': [0.95, 0.95], 'C5': [0.85, 0.85], 'C6': [0.93, 0.94]}
+
+def obtener_coeficientes(tipo_uva):
+    q_t_minus = calidades[tipo_uva][0]
+    q_t_plus = calidades[tipo_uva][1]
+    t_minus = -7
+    t_plus = 7
+    A = np.array([
+        [t_minus**2, t_minus, 1],
+        [0, 0, 1],
+        [t_plus**2, t_plus, 1]])
+    b = np.array([q_t_minus, 1, q_t_plus])
+    coefficients = np.linalg.solve(A, b)
+    a, b, c = coefficients
+    return a, b, c
+
+def funcion_cuadratica_calidad(tipo_uva):
+    a, b, c = obtener_coeficientes(tipo_uva)
+    def dia_estimado():
+        optimal_day = np.random.normal(0, 2)
+        return int(round(optimal_day))
+    t = dia_estimado()
+    calidad = max(min(a * t**2 + b * t + c, 1), 0)
+    return calidad
+
+for lote in lotes_finales:
+    tipo_uva = lote[2]
+    calidad = funcion_cuadratica_calidad(tipo_uva)
+    lote.append(calidad)
+
+## NOTAR QUE EL ULTIMO VALOR ES LA PARTE CUADRATICA
+print(lotes_finales[0])
 
 #En lotes_finales tendremos cada uno de los lotes, donde la ultima columna corresponde a la penalizacion que este tiene
 
@@ -239,7 +269,7 @@ for l, lote_info in enumerate(lotes_finales, start=1):
     q_expec[l] = lote_info[12]
 
 
-print(lotes_finales)
+###print(lotes_finales)
 #Hay que agregar las calidades para un periodo especifico
 #Creo que va a tener que ser una lista de listas que vaya por cada uno de los lotes 
 #y dentro tenga las calidades que tendría este lote para los diferentes posibles días
