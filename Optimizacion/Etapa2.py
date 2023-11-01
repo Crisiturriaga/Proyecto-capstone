@@ -249,71 +249,62 @@ for lote in lotes:
     cal = lote[12]*lote[13]
     lote.append(cal)
 #En lotes_finales tendremos cada uno de los lotes, donde la ultima columna corresponde a la penalizacion que este tiene
+print(lotes_finales[284])
+print(lotes_finales[284][14])
+print(lotes_finales[285])
+print(lotes_finales[285][14])
 
 # Creacion modelo
 model = gp.Model()
 
 # Índices
 L = range(1, 291)
-T = range(1, 6)  # Hay que cambiar por periodos reales
+Cepas = ["C1", "C2", "C3", "C4", "C5", "C6"]
 
 # Parámetros
 kg = {}  # Kilogramos de uva por lote
 q_expec = {}  # Calidad esperada del lote por lote y período
 r = {}  # Medida de riesgo por lote
 c = {} #costo por lote
+lote_cepa = {}  
 # Poblando los parametros con la lista de lotes obtenida mas arriba
 for l, lote_info in enumerate(lotes_finales, start=1):
     kg[l] = lote_info[3]*1000 
     r[l] = lote_info[9] 
     c[l] = lote_info[7] #costo por kg
     q_expec[l] = lote_info[14]
+    lote_cepa[l] = lote_info[2]
 
-
-###print(lotes_finales)
-#Hay que agregar las calidades para un periodo especifico
-#Creo que va a tener que ser una lista de listas que vaya por cada uno de los lotes 
-#y dentro tenga las calidades que tendría este lote para los diferentes posibles días
-
-    #for t in T:
-        #q_expec[l, t] = lote_info[1][t - 1]  # Calidad esperada del lote por período
-
-
-
-# Definir los parámetros kg, q_expec y r aquí
 
 # Variables de decisión
 x_spot = {}  # Variable binaria: 1 si el lote l se compra con contrato spot, 0 en otro caso
 x_fwd = {}  # Variable binaria: 1 si el lote l se compra con contrato forward, 0 en otro caso
 
-for l in L:
-    for t in T:
-        x_spot[l, t] = model.addVar(vtype=gp.GRB.BINARY, name=f'x_spot_{l}_{t}')
-    x_fwd[l] = model.addVar(vtype=gp.GRB.BINARY, name=f'x_fwd_{l}')
+for j in L:
+    x_spot[j] = model.addVar(vtype=gp.GRB.BINARY, name=f'x_spot_{j}')
+    x_fwd[j] = model.addVar(vtype=gp.GRB.BINARY, name=f'x_fwd_{j}')
 
 # Función Objetivo
 model.setObjective(
-    gp.quicksum((x_spot[j] * kg[j] * q_expec[j]*c[j] + x_fwd[j] * kg[j] * c[j] * 0.8) / (1 - r[j] + 0.0000001) for t in T),
+    gp.quicksum((x_spot[j] * kg[j] * q_expec[j]*c[j] + x_fwd[j] * kg[j] * c[j] * 0.8) / (1 - r[j] + 0.0000001) for j in L),
     sense=gp.GRB.MINIMIZE
 )
 
 # Restricciones
-# Restricción: Un lote se compra una sola vez
+# Restricción: Cada lote se compra una sola vez
 for j in L:
-    model.addConstr(gp.quicksum(x_spot[j, t] for t in T) + x_fwd[j] == 1, name=f'restriccion_compra_{j}')
+    model.addConstr(x_spot[j] + x_fwd[j] <= 1, name=f'restriccion_compra_{j}')
 
 # Restricción: Atender el requerimiento de cepas (debes definirlo)
-# Supongamos que el requerimiento está definido en un diccionario req_cepas, donde req_cepas[j] es la cantidad requerida del lote j.
-for j in L:
-    model.addConstr(gp.quicksum(x_spot[j, t] for t in T) * kg[j] >= req_cepas[j], name=f'restriccion_req_cepas_{j}')
+for i in Cepas:  # Itera sobre las cepas
+    model.addConstr(gp.quicksum(x_spot[j] * kg[j] + x_fwd[j] * kg[j] for j in L if lote_cepa[j] == i) >= 400000, name=f'restriccion_req_cepas_{i}')
 
 # Resolver el modelo
 model.optimize()
 
 # Obtener los resultados
 for j in L:
-    for t in T:
-        print(f"Lote {j}, Periodo {t}: Compra con contrato spot = {x_spot[j, t].x}")
+    print(f"Lote {j}: Compra con contrato spot = {x_spot[j].x}")
     print(f"Lote {j}: Compra con contrato forward = {x_fwd[j].x}")
 
 # Obtener el valor óptimo de la función objetivo
