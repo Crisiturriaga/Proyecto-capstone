@@ -7,13 +7,15 @@ m = Model("OptimizacionUvas")
 M = ['A', 'B', 'C', 'D']
 Productos = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'Blend 1.1', 'Blend 1.2', 'Blend 2.1', 'Blend 2.2', 'Blend 2.3', 'Blend 3.1', 'Blend 4.1', 'Blend 4.2']
 Blends = ['Blend 1.1', 'Blend 1.2', 'Blend 2.1', 'Blend 2.2', 'Blend 2.3', 'Blend 3.1', 'Blend 4.1', 'Blend 4.2']
+
 # Parámetros
+
 d_m = {
-    'A': 9520000,
-    'B': 12693333,
-    'C': 11106667,
-    'D': 9520000
-}
+    'A': 9520000*(3/4)*2,
+    'B': 12693333*(3/4)*2,
+    'C': 11106667*(3/4)*2,
+    'D': 9520000*(3/4)*2
+} # se multiplico la demanda de cada mercado por 3/4 para pasarlo de botellas a litros y luego por 2 para obtener los kilos que se necesitan
 
 prop = {
     ('C1', 'Blend 1.1'): 0.1,
@@ -118,12 +120,12 @@ m_b = {
     'Blend 4.2': 'C'
 }
 max_cepa = {
-    'C1': 9176250,
-    'C2': 8086875,
-    'C3':  6240000,
-    'C4': 6296250,
-    'C5': 10897500,
-    'C6': 7483125
+    'C1': 18352500,
+    'C2': 16173750,
+    'C3':  12480000,
+    'C4': 12592500,
+    'C5': 21795000,
+    'C6': 14966250
 }
 
 
