@@ -321,6 +321,6 @@ spot = 0
 for lote in lotes_finales:
     fwd += lote[-1]
     spot += lote[-2]
-print(lotes_finales_ordenados)
+
 print(fwd / 290)
 print(spot / 290)
