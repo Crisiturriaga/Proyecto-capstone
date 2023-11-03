@@ -11,6 +11,7 @@ lotes = []
 
 for index, row in df.iterrows():
     lista_lote = row.tolist()
+
     lotes.append(lista_lote)
 
 
@@ -121,8 +122,8 @@ ponderador_c5 = tolerancia_lluvias[2][4]
 ponderador_c6 = tolerancia_lluvias[2][5]
 
 # Se hacen penalizaciones dentro de cada cepa ya que los lotes se afectan de forma diferente segun la cepa
-a = 0.2
-b = 0.6
+a = 0.1
+b = 0.12
 c1_normalizada = normalizar(lluvias_c1, a, b)
 c2_normalizada = normalizar(lluvias_c2, a, b)
 c3_normalizada = normalizar(lluvias_c3, a, b)
@@ -207,7 +208,6 @@ for lote in lotes_finales:
     lote.append(tipo_3)
     q = (1 - tipo_3) * lote[10]
     lote.append(q)
-print(lotes_finales[0])
 calidades = {'C1': [0.85, 0.95], 'C2': [0.92, 0.93], 'C3': [0.91, 0.87], 'C4': [0.95, 0.95], 'C5': [0.85, 0.85],
              'C6': [0.93, 0.94]}
 
@@ -249,10 +249,7 @@ for lote in lotes:
     cal = lote[12] * lote[13]
     lote.append(cal)
 # En lotes_finales tendremos cada uno de los lotes, donde la ultima columna corresponde a la penalizacion que este tiene
-print(lotes_finales[284])
-print(lotes_finales[284][14])
-print(lotes_finales[285])
-print(lotes_finales[285][14])
+
 
 # Creacion modelo
 model = gp.Model()
@@ -285,8 +282,7 @@ for j in L:
 
 # Función Objetivo
 model.setObjective(
-    gp.quicksum(
-        (x_spot[j] * kg[j] * q_expec[j] * c[j] + x_fwd[j] * kg[j] * c[j] * 0.8) / (1 - r[j] + 0.0000001) for j in L),
+    gp.quicksum((x_spot[j] * kg[j] * q_expec[j] * c[j] * (1 - r[j]) + x_fwd[j] * kg[j] * c[j] * 0.8) for j in L),
     sense=gp.GRB.MINIMIZE
 )
 
@@ -294,11 +290,6 @@ model.setObjective(
 # Restricción: Cada lote se compra una sola vez
 for j in L:
     model.addConstr(x_spot[j] + x_fwd[j] == 1, name=f'restriccion_compra_{j}')
-
-# Restricción: Atender el requerimiento de cepas (debes definirlo)
-for i in Cepas:  # Itera sobre las cepas
-    model.addConstr(gp.quicksum(x_spot[j] * kg[j] + x_fwd[j] * kg[j] for j in L if lote_cepa[j] == i) >= 400000,
-                    name=f'restriccion_req_cepas_{i}')
 
 # Resolver el modelo
 model.optimize()
@@ -311,6 +302,8 @@ for j in L:
     resultados_x_spot.append(x_spot[j].x)
     resultados_x_fwd.append(x_fwd[j].x)
 
+# Obtener los resultados
+for j in L:
     print(f"Lote {j}: Compra con contrato spot = {x_spot[j].x}")
     print(f"Lote {j}: Compra con contrato forward = {x_fwd[j].x}")
 
@@ -322,4 +315,12 @@ for j in L:
     lotes_finales[j - 1].append(resultados_x_fwd[j - 1])
 
 lotes_finales_ordenados = sorted(lotes_finales, key=lambda lote: int(lote[0][2:-3]))
+
+fwd = 0
+spot = 0
+for lote in lotes_finales:
+    fwd += lote[-1]
+    spot += lote[-2]
 print(lotes_finales_ordenados)
+print(fwd / 290)
+print(spot / 290)
