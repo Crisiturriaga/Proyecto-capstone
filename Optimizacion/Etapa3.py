@@ -1,4 +1,5 @@
 from gurobipy import Model, GRB
+from Etapa1 import Datos_finales,prop
 from Etapa2 import lotes_finales_ordenados, lote_info
 import numpy as np
 
@@ -15,7 +16,7 @@ for i in lotes_finales_ordenados:
         F.append(i[0])
 print("S",S)
 print("F",F)
-
+Conjunto_final = {}
 L = [
     'L_1_C4', 'L_2_C4', 'L_3_C6', 'L_4_C4', 'L_5_C6', 'L_6_C3', 'L_7_C5', 'L_8_C6', 'L_9_C1', 'L_10_C5',
     'L_11_C1', 'L_12_C1', 'L_13_C5', 'L_14_C2', 'L_15_C1', 'L_16_C6', 'L_17_C5', 'L_18_C2', 'L_19_C2', 'L_20_C4',
@@ -56,6 +57,7 @@ calidades = {'C1': [0.85, 0.95], 'C2': [0.92, 0.93], 'C3': [0.91, 0.87], 'C4': [
              'C6': [0.93, 0.94]}
 
 
+riesgo_l = {}
 # Parámetros
 r_cl = {
     ("C1", "L_9_C1"): 300000,
@@ -345,6 +347,12 @@ r_cl = {
     ("C6", "L_282_C6"): 487.5 * 1000
 
 }
+for sublista in lotes_finales_ordenados:
+    clave = sublista[0]
+    valor = sublista[9]
+    riesgo_l[clave] = valor
+
+print("riesgo",riesgo_l)
 
 
 
@@ -640,14 +648,15 @@ d_l = {
     "L_289_C5": 113,
     "L_290_C6": 81
 }
-d_c = {'C1': 6674413,
-    'C2': 16173750,
-    'C3': 12480000,
-    'C4': 12592500,
-    'C5': 14337206,
-    'C6': 2002133
+d_c = {'C1': Datos_finales[0] + prop[('C1', 'Blend 1.1')]* Datos_finales[6]+ prop[('C1', 'Blend 1.2')]* Datos_finales[7]+ prop[('C1', 'Blend 2.1')]* Datos_finales[8]+ prop[('C1', 'Blend 2.2')]* Datos_finales[9]+ prop[('C1', 'Blend 2.3')]* Datos_finales[10]+ prop[('C1', 'Blend 3.1')]* Datos_finales[11]+ prop[('C1', 'Blend 4.1')]* Datos_finales[12]+ prop[('C1', 'Blend 4.2')]* Datos_finales[13],
+    'C2': Datos_finales[1] + prop[('C2', 'Blend 1.1')]* Datos_finales[6]+ prop[('C2', 'Blend 1.2')]* Datos_finales[7]+ prop[('C2', 'Blend 2.1')]* Datos_finales[8]+ prop[('C2', 'Blend 2.2')]* Datos_finales[9]+ prop[('C2', 'Blend 2.3')]* Datos_finales[10]+ prop[('C2', 'Blend 3.1')]* Datos_finales[11]+ prop[('C2', 'Blend 4.1')]* Datos_finales[12]+ prop[('C2', 'Blend 4.2')]* Datos_finales[13],
+    'C3': Datos_finales[2] + prop[('C3', 'Blend 1.1')]* Datos_finales[6]+ prop[('C3', 'Blend 1.2')]* Datos_finales[7]+ prop[('C3', 'Blend 2.1')]* Datos_finales[8]+ prop[('C3', 'Blend 2.2')]* Datos_finales[9]+ prop[('C3', 'Blend 2.3')]* Datos_finales[10]+ prop[('C3', 'Blend 3.1')]* Datos_finales[11]+ prop[('C3', 'Blend 4.1')]* Datos_finales[12]+ prop[('C3', 'Blend 4.2')]* Datos_finales[13],
+    'C4': Datos_finales[3] + prop[('C4', 'Blend 1.1')]* Datos_finales[6]+ prop[('C4', 'Blend 1.2')]* Datos_finales[7]+ prop[('C4', 'Blend 2.1')]* Datos_finales[8]+ prop[('C4', 'Blend 2.2')]* Datos_finales[9]+ prop[('C4', 'Blend 2.3')]* Datos_finales[10]+ prop[('C4', 'Blend 3.1')]* Datos_finales[11]+ prop[('C4', 'Blend 4.1')]* Datos_finales[12]+ prop[('C4', 'Blend 4.2')]* Datos_finales[13],
+    'C5': Datos_finales[4] + prop[('C5', 'Blend 1.1')]* Datos_finales[6]+ prop[('C5', 'Blend 1.2')]* Datos_finales[7]+ prop[('C5', 'Blend 2.1')]* Datos_finales[8]+ prop[('C5', 'Blend 2.2')]* Datos_finales[9]+ prop[('C5', 'Blend 2.3')]* Datos_finales[10]+ prop[('C5', 'Blend 3.1')]* Datos_finales[11]+ prop[('C5', 'Blend 4.1')]* Datos_finales[12]+ prop[('C5', 'Blend 4.2')]* Datos_finales[13],
+    'C6': Datos_finales[5] + prop[('C6', 'Blend 1.1')]* Datos_finales[6]+ prop[('C6', 'Blend 1.2')]* Datos_finales[7]+ prop[('C6', 'Blend 2.1')]* Datos_finales[8]+ prop[('C6', 'Blend 2.2')]* Datos_finales[9]+ prop[('C6', 'Blend 2.3')]* Datos_finales[10]+ prop[('C6', 'Blend 3.1')]* Datos_finales[11]+ prop[('C6', 'Blend 4.1')]* Datos_finales[12]+ prop[('C6', 'Blend 4.2')]* Datos_finales[13]
 } # Cantidad de cepa c requerida / esto varia si varia el resultado de la etapa 1, HABRIA QUE CAMBIARLO MANUAL
 
+print(d_c)
 
 u_l = {
     'L_1_C4': 0.7,    # Cepa C4
@@ -942,7 +951,7 @@ u_l = {
     'L_290_C6': 0.7  # Cepa C6
 } # Umbral de industrialización del lote l
 q_lt = {} # Calidad del lote l en el periodo t
-
+M = 1 #parametro grande considernado
 
 #Actualizar los dias optimos de cada lote incluyendo variabilidad
 
@@ -996,7 +1005,7 @@ dc_l = m.addVars(L, vtype=GRB.CONTINUOUS, name="dc")
 w_ct = m.addVars(C, T, vtype=GRB.CONTINUOUS, name="w")
 
 # Función Objetivo
-m.setObjective(sum(q_lt[l, t]*x_lt[l, t] for l in L for t in T), GRB.MAXIMIZE)
+m.setObjective(sum(q_lt[l, t]*x_lt[l, t] - M*riesgo_l[l]  for l in L for t in T), GRB.MAXIMIZE)
 
 # Restricciones
 for l in S:
@@ -1049,9 +1058,10 @@ if m.status == GRB.OPTIMAL:
     for l in L:
         for t in T:
             if x_lt[l, t].x == 1:
-                print(t)
-                print(f"x_{l}_{t}:", x_lt[l, t].x, f" Cantidad de kilo del lote, pta no alcanze a definirlo se podria sacar de forma manual desde r_cl")
+                Conjunto_final[f"x_{l}"] = t
+                print(f"x_{l}_{t}:", x_lt[l, t].x, f"Cosechado el dia", t , f" Cantidad de kilo del lote, pta no alcanze a definirlo se podria sacar de forma manual desde r_cl")
 
+print(Conjunto_final)
 
 
 
