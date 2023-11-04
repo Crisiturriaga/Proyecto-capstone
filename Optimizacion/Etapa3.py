@@ -13,8 +13,8 @@ for i in lotes_finales_ordenados:
         S.append(i[0])
     elif i[16] == 1:
         F.append(i[0])
-print("S",S)
-print("F",F)
+#print("S",S)
+#print("F",F)
 
 L = [
     'L_1_C4', 'L_2_C4', 'L_3_C6', 'L_4_C4', 'L_5_C6', 'L_6_C3', 'L_7_C5', 'L_8_C6', 'L_9_C1', 'L_10_C5',
