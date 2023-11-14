@@ -17,6 +17,7 @@ d_m = {
     'D': 9520000*(3/4)*2
 } # se multiplico la demanda de cada mercado por 3/4 para pasarlo de botellas a litros y luego por 2 para obtener los kilos que se necesitan
 
+Datos_finales = []
 prop = {
     ('C1', 'Blend 1.1'): 0.1,
     ('C2', 'Blend 1.1'): 0.2,
@@ -157,4 +158,15 @@ m.optimize()
 # Imprimir resultados
 if m.status == GRB.OPTIMAL:
     for p in Productos:
+        Datos_finales.append(x[p].x)
         print(f"Cantidad de {p}: {x[p].x}")
+print(Datos_finales)
+
+C1 = Datos_finales[0] + Datos_finales[6]*0.1 + Datos_finales[8]*0.3 + Datos_finales[10]*0.2 + Datos_finales[11]*0.5 + Datos_finales[12]*0.15 + Datos_finales[13]*0.12
+C2 = Datos_finales[1] + Datos_finales[6]*0.2 + Datos_finales[7]*0.4 + Datos_finales[8]*0.2 + Datos_finales[9]*0.2 + Datos_finales[12]*0.15 + Datos_finales[13]*0.15
+C3 = Datos_finales[2] + Datos_finales[7]*0.2 + Datos_finales[8]*0.1 + Datos_finales[9]*0.2 + Datos_finales[10]*0.2 + Datos_finales[11]*0.2 + Datos_finales[12]*0.15 + Datos_finales[13]*0.08
+C4 = Datos_finales[3] + Datos_finales[6]*0.3 + Datos_finales[7]*0.2 + Datos_finales[8]*0.2 + Datos_finales[9]*0.2 + Datos_finales[10]*0.2 + Datos_finales[12]*0.15 + Datos_finales[13]*0.1
+C5 = Datos_finales[4] + Datos_finales[9]*0.2 + Datos_finales[11]*0.1 + Datos_finales[12]*0.1 + Datos_finales[13]*0.1
+C6 = Datos_finales[5] + Datos_finales[6]*0.4 + Datos_finales[7]*0.2 + Datos_finales[8]*0.2 + Datos_finales[9]*0.2 + Datos_finales[10]*0.4 + Datos_finales[11]*0.2 + Datos_finales[12]*0.3 + Datos_finales[13]*0.45
+
+Requerimientos = [C1,C2,C3,C4,C5,C6]
