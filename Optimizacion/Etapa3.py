@@ -133,6 +133,9 @@ for cepa in Cepas:
     indice += 1
 
 
+print (requerimientos)
+
+
 
 q_lt = {} # Calidad del lote l en el periodo t
 M = 1 #parametro grande considernado
@@ -166,11 +169,11 @@ m.setObjective(
 
 #Restricciones
 for c in Cepas:
-    m.addConstr(gp.quicksum(kg[l]* x_compra[l, t] for l in L for t in T) >= requerimientos[c], name=f"restriccion_requerimientos_{c}")
+    m.addConstr(gp.quicksum(kg[l]* x_compra[l, t] for l in L for t in T if lote_cepa[l] == c) >= requerimientos[c], name=f"restriccion_requerimientos_{c}")
 
 
 for l in L:
-    m.addConstr(gp.quicksum(x_compra[l, t] * q[l][t] for t in T) >= umbral[l], name=f"restriccion_cosechar_sobre_umbral_{l}")
+    m.addConstr(gp.quicksum(x_compra[l, t] * q[l][t] for t in T) >= umbral[l] * x_compra[l, t], name=f"restriccion_cosechar_sobre_umbral_{l}")
 
 for l in L:
     m.addConstr(gp.quicksum(x_compra[l, t]for t in T)<= 1, name = f"restriccion comprar solo en un periodo")
@@ -229,13 +232,39 @@ if m.status == gp.GRB.OPTIMAL:
 
     # Imprimir variables de decisión
     listita = 0
+    ce1 = 0
+    ce2 = 0
+    ce3 = 0
+    ce4 = 0
+    ce5 = 0
+    ce6 = 0
+
     for l in L:
         for t in T:
             valor_x_compra = x_compra[l, t].x
             if valor_x_compra>0:
                 listita += 1
                 print(f"x_compra[{l}, {t}] = {valor_x_compra}")
+                if lote_cepa[l] == "C1":
+                    ce1 += kg[l]
+                if lote_cepa[l] == "C2":
+                    ce2 += kg[l]
+                if lote_cepa[l] == "C3":
+                    ce3 += kg[l]
+                if lote_cepa[l] == "C4":
+                    ce4 += kg[l]
+                if lote_cepa[l] == "C5":
+                    ce5 += kg[l]
+                if lote_cepa[l] == "C6":
+                    ce6 += kg[l]
+
     print(listita)
+    print(ce1,requerimientos["C1"])
+    print(ce2,requerimientos["C2"])
+    print(ce3,requerimientos["C3"])
+    print(ce4,requerimientos["C4"])
+    print(ce5,requerimientos["C5"])
+    print(ce6,requerimientos["C6"])
 
 
     # Puedes agregar más variables de decisión según sea necesario
