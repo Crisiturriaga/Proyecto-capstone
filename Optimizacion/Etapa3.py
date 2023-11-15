@@ -170,8 +170,10 @@ for c in Cepas:
 
 
 for l in L:
-    for t in T:
-        m.addConstr(x_compra[l, t] * q[l][t] >= umbral[l], name = f"restriccion cosechar sobre el umbral")
+    m.addConstr(gp.quicksum(x_compra[l, t] * q[l][t] for t in T) >= umbral[l], name=f"restriccion_cosechar_sobre_umbral_{l}")
+
+for l in L:
+    m.addConstr(gp.quicksum(x_compra[l, t]for t in T)<= 1, name = f"restriccion comprar solo en un periodo")
 #for l in S:
     #Aviso de cosecha para los lotes de tipo forward (que aviso se emita dos dias antes)
     #m.addConstr(d_l[l] - dc_l[l] == 2, name=f"restr1_{l}")
@@ -226,10 +228,15 @@ if m.status == gp.GRB.OPTIMAL:
     print(f"Valor de la función objetivo: {m.objVal}")
 
     # Imprimir variables de decisión
+    listita = 0
     for l in L:
         for t in T:
             valor_x_compra = x_compra[l, t].x
-            print(f"x_compra[{l}, {t}] = {valor_x_compra}")
+            if valor_x_compra>0:
+                listita += 1
+                print(f"x_compra[{l}, {t}] = {valor_x_compra}")
+    print(listita)
+
 
     # Puedes agregar más variables de decisión según sea necesario
 
