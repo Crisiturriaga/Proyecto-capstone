@@ -286,7 +286,7 @@ for lote in lotes_finales_ordenados:
     if len(lote) <20:
         lote.append(0)
         lote.append(-1)
-print(lotes_finales_ordenados[289])
+
 
 #La lista que se debe importar a la etapa 4 es "lotes_finales_ordenados"
 #El atributo lote[19] es una binaria que entrega un 1 si se cosecha el lote, cero si no se cosecha
