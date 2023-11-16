@@ -7,6 +7,7 @@ archivo_excel = 'info-vinos_2023_v2.xlsx'
 df = pd.read_excel(archivo_excel, sheet_name=1)
 
 
+print("ETAPA 2 ------------------------")
 # Lista para almacenar lotes
 lotes = []
 

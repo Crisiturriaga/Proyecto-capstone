@@ -9,6 +9,7 @@ m = Model("FermentacionDeUva")
 # Leer datos del archivo CSV
 df = pd.read_csv('datos.csv')
 
+print("ETAPA 4 ------------------------")
 #El atributo lote[19] es una binaria que entrega un 1 si se cosecha el lote, cero si no se cosecha
 #El atributo lote[20] entrega el dia en que se debe cosechar el lote, si no se cosecha, el valor del atributo es (-1)
 
@@ -33,7 +34,6 @@ D = range(df['Dia optimo cosecha estimado inicialmente'].min(),
 
 # Parámetros
 Cap = {t: 25000 for t in T}  # Capacidad de cada tanque t
-
 Dur = 8  # Duración promedio de la fermentación
 Costo = 1600  # Costo promedio por cada 24 tanques utilizados
 
@@ -49,10 +49,7 @@ grupos_tanques = m.addVars(D, vtype=GRB.INTEGER, name="grupos_tanques")
 # Función objetivo
 m.setObjective(quicksum(grupos_tanques[d] * Costo for d in D), GRB.MINIMIZE)
 
-# Ajustar parámetros de Gurobi
-m.setParam(GRB.Param.Heuristics, 0.5)  # Aumentar el uso de heurísticas
-m.setParam(GRB.Param.TimeLimit, 120)  # Establecer un límite de tiempo de 2 minutos
-m.setParam(GRB.Param.MIPGap, 0.30)  # Aceptar una brecha de optimalidad del 5%
+
 
 # Restricciones
 # 1. Asignación de lotes

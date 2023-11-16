@@ -6,6 +6,7 @@ import numpy as np
 # Creación del modelo
 m = gp.Model()
 
+print("ETAPA 3 ------------------------")
 # Índices
 S = []  # Conjunto de lotes comprados con spot
 F = [] # Conjunto de lotes comprados con forward

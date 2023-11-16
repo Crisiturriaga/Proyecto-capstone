@@ -2,7 +2,7 @@ from gurobipy import Model, GRB, quicksum
 
 # Creación del modelo
 m = Model("OptimizacionUvas")
-
+print("ETAPA 1 ------------------")
 # Índices
 M = ['A', 'B', 'C', 'D']
 Productos = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'Blend 1.1', 'Blend 1.2', 'Blend 2.1', 'Blend 2.2', 'Blend 2.3', 'Blend 3.1', 'Blend 4.1', 'Blend 4.2']
