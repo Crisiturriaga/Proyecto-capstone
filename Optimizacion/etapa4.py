@@ -13,13 +13,13 @@ print("ETAPA 4 ------------------------")
 #El atributo lote[19] es una binaria que entrega un 1 si se cosecha el lote, cero si no se cosecha
 #El atributo lote[20] entrega el dia en que se debe cosechar el lote, si no se cosecha, el valor del atributo es (-1)
 
-L = []  # Lista de los primeros 10 lotes
-Dia = {}
-Vol = {}  # Volumen de cada lote
-Cepa = {}
-Calidad = {}  # Calidad fija para todos los lotes
+L = []  # Lista de los lotes que son cosechados por etapa 3
+Dia = {}  # dias en que se debe cosechar segun etapa 3
+Vol = {}  # Volumen de cada lote, Cantidad de kg de cada lote
+Cepa = {} #tipo de cepa del lote
+Calidad = {}  # Calidad de cada lote en el dia que se cosecha
 # Conjuntos
-for i in range(0,len(lotes_finales_ordenados)):
+for i in range(0,len(lotes_finales_ordenados)):  # aqui se definen lo parametros
     if lotes_finales_ordenados[i][19] == 1:
         L.append(lotes_finales_ordenados[i][0])
         Dia[lotes_finales_ordenados[i][0]] = lotes_finales_ordenados[i][20]
@@ -27,10 +27,10 @@ for i in range(0,len(lotes_finales_ordenados)):
         Cepa[lotes_finales_ordenados[i][0]]= lotes_finales_ordenados[i][2]
         lista_calidad = lotes_finales_ordenados[i][18]
         Calidad[lotes_finales_ordenados[i][0]] = lista_calidad[lotes_finales_ordenados[i][20]] #calidad del dia de cosecha segun etapa 3
-C = ["C1","C2","C3","C4","C5","C6"]  # Lista de cepas
+C = ["C1","C2","C3","C4","C5","C6"]  # Lista de tipos de cepas
 T = range(216)  # 216 tanques disponibles
 D = range(df['Dia optimo cosecha estimado inicialmente'].min(),
-          df['Dia optimo cosecha estimado inicialmente'].max() + 1)  # Horizonte de planificación
+          df['Dia optimo cosecha estimado inicialmente'].max() + 1)  # Horizonte de planificación, horizonte de periodo
 
 # Parámetros
 Cap = {t: 25000 for t in T}  # Capacidad de cada tanque t
@@ -93,19 +93,6 @@ for t in T:
     for c in C:
         for d in D:
             m.addConstr(quicksum(x[l, t, d] for l in L if Cepa[l] != c) == 0)
-
-# 8. Conteo de tanques usados
-for d in D:
-    m.addConstr(tanques_usados[d] == quicksum(ocupado[t, d] for t in T))
-
-# 9. Cálculo de la calidad del vino en cada tanque
-for t in T:
-    suma_calidad = quicksum(Calidad[l] * Vol[l] * x[l, t, d] for l in L for d in D)
-    suma_volumen = quicksum(Vol[l] * x[l, t, d] for l in L for d in D)
-    m.addConstr(calidad_tanque[t] * suma_volumen == suma_calidad)
-# Restricciones adicionales para definir los grupos de tanques
-for d in D:
-    m.addConstr(grupos_tanques[d] >= (tanques_usados[d] + 23) / 24)
 
 # Optimizar el modelo
 m.optimize()
