@@ -23,7 +23,7 @@ for i in range(0,len(lotes_finales_ordenados)):  # aqui se definen lo parametros
     if lotes_finales_ordenados[i][19] == 1:
         L.append(lotes_finales_ordenados[i][0])
         Dia[lotes_finales_ordenados[i][0]] = lotes_finales_ordenados[i][20]
-        Vol[lotes_finales_ordenados[i][0]] = lotes_finales_ordenados[i][3]*1000
+        Vol[lotes_finales_ordenados[i][0]] = lotes_finales_ordenados[i][3]*1000*0.5
         Cepa[lotes_finales_ordenados[i][0]]= lotes_finales_ordenados[i][2]
         lista_calidad = lotes_finales_ordenados[i][18]
         Calidad[lotes_finales_ordenados[i][0]] = lista_calidad[lotes_finales_ordenados[i][20]] #calidad del dia de cosecha segun etapa 3
@@ -89,9 +89,9 @@ for l in L:
             m.addConstr(quicksum(ocupado[t, d_prime] for d_prime in range(d, limite_superior)) >= Dur * x[l, t, d])
 
 # 7. No mezclar cepas en un tanque
-for t in T:
+for d in D:
     for c in C:
-        for d in D:
+        for t in T:
             m.addConstr(quicksum(x[l, t, d] for l in L if Cepa[l] != c) == 0)
 
 # Optimizar el modelo
