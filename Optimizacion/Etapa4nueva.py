@@ -52,14 +52,17 @@ y = modelo.addVars(T, D, vtype=GRB.BINARY, name='y')
 # Función objetivo
 modelo.setObjective(gp.quicksum(x[g, t, d] for g in G for t in T for d in D), sense=GRB.MAXIMIZE)
 
-# Restricciones de asignación de uva
+# Restricciones de asignación de uva,  asegura que cada tipo de uva g solo puede ser asignado a un tanque en un día específico d
 modelo.addConstrs((x.sum(g, '*', d) <= 1 for g in G for d in D), name='asignacion_uva')
 
-# Restricciones de ocupación de tanques
+# Restricciones de ocupación de tanques  asegura que un tanque específico t solo puede estar ocupado por un tipo de uva en un día específico d.
 modelo.addConstrs((x.sum('*', t, d) <= 1 for t in T for d in D), name='ocupacion_tanques')
 
-# Restricciones de duración de fermentación
+# Restricciones de duración de fermentación, maximo 8 dias
 modelo.addConstrs((gp.quicksum(x[g, t, d_prime] for d_prime in range(d, min(d + 8, len(D)))) <= 8 * y[t, d] for g in G for t in T for d in D), name='duracion_fermentacion')
+
+# Capcacidad de cada tanque
+modelo.addConstrs((gp.quicksum(Vol[l] * x[l, t, d] for l in L) <= Cap[t] * y[t, d] for t in T for d in D), name='capacidad_tanques')
 
 # Restricciones de disponibilidad de uva (debes completar esta parte según tus necesidades)
 
