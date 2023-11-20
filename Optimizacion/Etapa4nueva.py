@@ -41,28 +41,34 @@ Cap = {t: 25000 for t in T}  # Capacidad de cada tanque t
 Dur = 8  # Duración promedio de la fermentación
 Costo = 1600  # Costo promedio por cada 24 tanques utilizados
 
-
+M = 10000
 # Crear modelo
 modelo = gp.Model('Asignacion_Uva')
 
 # Crear variables de decisión
-x = modelo.addVars(G, T, D, vtype=GRB.BINARY, name='x')
-y = modelo.addVars(T, D, vtype=GRB.BINARY, name='y')
+z = modelo.addVars(L, T,D, vtype=GRB.CONTINUOUS, name='z')
+w = modelo.addVars(L,T, D, vtype=GRB.BINARY, name='w')
 
 # Función objetivo
-modelo.setObjective(gp.quicksum(x[g, t, d] for g in G for t in T for d in D), sense=GRB.MAXIMIZE)
+modelo.setObjective(gp.quicksum(z[l, t, d] for l in L for t in T for d in D), sense=GRB.MAXIMIZE)
 
 # Restricciones de asignación de uva,  asegura que cada tipo de uva g solo puede ser asignado a un tanque en un día específico d
-modelo.addConstrs((x.sum(g, '*', d) <= 1 for g in G for d in D), name='asignacion_uva')
+modelo.addConstrs((gp.quicksum(w[l,t,d] for t in T) <= 1 for l in L for d in D), name='asignacion_uva')
 
 # Restricciones de ocupación de tanques  asegura que un tanque específico t solo puede estar ocupado por un tipo de uva en un día específico d.
-modelo.addConstrs((x.sum('*', t, d) <= 1 for t in T for d in D), name='ocupacion_tanques')
+modelo.addConstrs((gp.quicksum(w[l,t,d] for l in L) <= 1 for t in T for d in D), name='ocupacion_tanques')
 
 # Restricciones de duración de fermentación, maximo 8 dias
-modelo.addConstrs((gp.quicksum(x[g, t, d_prime] for d_prime in range(d, min(d + 8, len(D)))) <= 8 * y[t, d] for g in G for t in T for d in D), name='duracion_fermentacion')
+modelo.addConstrs((gp.quicksum(w[l, t, d_prime] for d_prime in range(d, min(d + 8, len(D)))) <= 8 * w[l,t, d] for l in L for t in T for d in D), name='duracion_fermentacion')
 
-# Capcacidad de cada tanque
-modelo.addConstrs((gp.quicksum(Vol[l] * x[l, t, d] for l in L) <= Cap[t] * y[t, d] for t in T for d in D), name='capacidad_tanques')
+# Capacidad máxima y minima del tanque
+modelo.addConstrs(((Cap[t] * 0.3  <= gp.quicksum(z[l, t, d] for l in L) <= Cap[t]) for t in T for d in D), name='capacidad_maxima_tanque')
+
+# Restricción para asegurar que la suma de z para cada lote y día no exceda el volumen del lote
+modelo.addConstrs((gp.quicksum(z[l, t, d] for t in T) <= Vol[l]*w[l,t,d] for t in T for l in L for d in D), name='suma_z_w')
+
+# Restricciones de respetar fechas de inicio
+modelo.addConstrs((w[l, t, d] == 0 for l in L for t in T for d in D if d < Dia[l] or d >= Dia[l] + Dur), name='respetar_fechas_inicio')
 
 # Restricciones de disponibilidad de uva (debes completar esta parte según tus necesidades)
 
@@ -70,19 +76,23 @@ modelo.addConstrs((gp.quicksum(Vol[l] * x[l, t, d] for l in L) <= Cap[t] * y[t, 
 # Optimizar el modelo
 modelo.optimize()
 
+
 # Imprimir resultado
 if modelo.status == GRB.OPTIMAL:
     print('Valor objetivo:', modelo.objVal)
     print('Asignación de uva:')
-    for g in G:
+    for l in L:
         for t in T:
             for d in D:
-                if x[g, t, d].x > 0.5:
-                    print(f'Tipo de uva {g} asignado al tanque {t} en el día {d}')
+                if w[l, t, d].x > 0.5:
+                    print(f'Tipo de uva {l} asignado al tanque {t} en el día {d}')
     print('Ocupación de tanques:')
-    for t in T:
-        for d in D:
-            if y[t, d].x > 0.5:
-                print(f'Tanque {t} ocupado en el día {d}')
+    for l in L:
+        for t in T:
+            for d in D:
+                if z[l, t, d].x >= 0.5:
+                    cantidad_asignada = z[l, t, d].x  # Obtener la cantidad asignada
+                    print(f'Tanque {t}, Lote {l}, Día {d}: Cantidad asignada = {cantidad_asignada}')
+
 else:
     print('El modelo no tiene solución óptima.')
