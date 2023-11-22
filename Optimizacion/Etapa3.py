@@ -248,7 +248,7 @@ if m.status == gp.GRB.OPTIMAL:
                 lotes_finales_ordenados[l-1].append(valor_x_compra)
                 lotes_finales_ordenados[l-1].append(t)
                 listita += 1
-                print(f"x_compra[{l}, {t}] = {valor_x_compra}")
+                #print(f"x_compra[{l}, {t}] = {valor_x_compra}") --------Descomentar sietapa 4 funcionA- DDDDDDDDDD
                 if t >= days:
                     days = t
                 if t <= diias:
@@ -266,15 +266,13 @@ if m.status == gp.GRB.OPTIMAL:
                 if lote_cepa[l] == "C6":
                     ce6 += kg[l]
 
-    print(listita)
+    #print(listita)
     print(ce1,requerimientos["C1"])
     print(ce2,requerimientos["C2"])
     print(ce3,requerimientos["C3"])
     print(ce4,requerimientos["C4"])
     print(ce5,requerimientos["C5"])
     print(ce6,requerimientos["C6"])
-    print(diias)
-    print(days)
 
 
     # Puedes agregar más variables de decisión según sea necesario
@@ -282,7 +280,6 @@ if m.status == gp.GRB.OPTIMAL:
 else:
     print("El modelo no tiene solución óptima.")
 
-print (len(lotes_finales_ordenados[288]))
 for lote in lotes_finales_ordenados:
     if len(lote) <20:
         lote.append(0)
@@ -292,4 +289,3 @@ for lote in lotes_finales_ordenados:
 #La lista que se debe importar a la etapa 4 es "lotes_finales_ordenados"
 #El atributo lote[19] es una binaria que entrega un 1 si se cosecha el lote, cero si no se cosecha
 #El atributo lote[20] entrega el dia en que se debe cosechar el lote, si no se cosecha, el valor del atributo es (-1)
-
