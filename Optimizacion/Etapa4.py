@@ -26,9 +26,14 @@ for i in range(len(lotes_finales_ordenados)):
         lista_calidad = lotes_finales_ordenados[i][18]
         Calidad[lote_id] = lista_calidad[lotes_finales_ordenados[i][20]]
 
+print(Vol)
+print(Dia)
+print("DDDD")
 # Definir el rango de días correctamente antes de definir las variables
 Dur = 8  # Duración de la fermentación
-ultimo_dia = df['Dia optimo cosecha estimado inicialmente'].max() + Dur
+ultimo_dia = df['Dia optimo cosecha estimado inicialmente'].max() + 20
+D = range(df['Dia optimo cosecha estimado inicialmente'].min() - 20, ultimo_dia)
+ultimo_dia = df['Dia optimo cosecha estimado inicialmente'].max() + 20
 D = range(df['Dia optimo cosecha estimado inicialmente'].min() - 20, ultimo_dia)
 G = ["C1", "C2", "C3", "C4", "C5", "C6"]  # Tipos de uva
 T = range(216)  # Tanques disponibles
@@ -118,7 +123,7 @@ if modelo.status == GRB.OPTIMAL:
                         # Acumular los litros asignados a cada lote
                         if l not in litros_por_lote:
                             litros_por_lote[l] = 0
-                        litros_por_lote[l] += cantidad_asignada
+                        litros_por_lote[l] += cantidad_asignada/8
 
     # Agregar la información de cada lote a la lista
     for l in litros_por_lote:
@@ -132,7 +137,7 @@ if modelo.status == GRB.OPTIMAL:
 
     # Cálculo de litros fermentados por cepa
     litros_por_cepa = {
-        g: sum(z[l, t, d].x for l in L for t in T for d in D if (Dia[l] <= d < Dia[l] + Dur) if Cepa[l] == g) for g in
+        g: sum(z[l, t, d].x/8 for l in L for t in T for d in D if (Dia[l] <= d < Dia[l] + Dur) if Cepa[l] == g) for g in
         G}
 
 
@@ -163,13 +168,13 @@ with open('output_etapa4.txt', 'w') as file:
 
     # Cálculo de litros fermentados por cepa
     litros_por_cepa = {
-        g: sum(z[l, t, d].x for l in L for t in T for d in D if (Dia[l] <= d < Dia[l] + Dur) if Cepa[l] == g) for g in
+        g: sum(z[l, t, d].x/8 for l in L for t in T for d in D if (Dia[l] <= d < Dia[l] + Dur) if Cepa[l] == g) for g in
         G}
 
     file.write("\nLitros fermentados por cepa:\n")
     for g in litros_por_cepa:
         file.write(
-            f"{g}: {litros_por_cepa[g] / 8} litros\n")  # Se divide por 8 para obtener la cantidad real fermentada.
+            f"{g}: {litros_por_cepa[g]} litros\n")  # Lo dividi mas arriba
 
     # Imprimir la lista para etapa 5
     file.write("\nOutput para Etapa 5:\n")

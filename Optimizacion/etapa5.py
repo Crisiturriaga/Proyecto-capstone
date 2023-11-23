@@ -1,4 +1,6 @@
 from gurobipy import *
+from Etapa4 import info_lotes, litros_por_cepa
+
 
 # Crear un nuevo modelo
 m = Model("optimizacion_vinos")
@@ -7,14 +9,18 @@ m = Model("optimizacion_vinos")
 cepas = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6']
 mercados = ['A', 'B', 'C', 'D']
 
+#[['L_1_C4', 108750.0, 121], ejemplo de info_lotes nombre, cant, dia que llega
+print(info_lotes)
+print("ETAPA 5")
+print(litros_por_cepa)
 # Litros disponibles por cepa
 litros_disponibles = {
-    'C1': 9176250,
-    'C2': 8086875,
-    'C3': 6240000,
-    'C4': 6296250,
-    'C5': 10897500,
-    'C6': 7483125
+    'C1': litros_por_cepa["C1"],
+    'C2': litros_por_cepa["C2"],
+    'C3': litros_por_cepa["C3"],
+    'C4': litros_por_cepa["C4"],
+    'C5': litros_por_cepa["C5"],
+    'C6': litros_por_cepa["C6"]
 }
 
 # Composición de Blend 4
@@ -27,7 +33,7 @@ blend4_composition = {
     'C6': 0.45
 }
 
-# Demanda mínima en botellas por mercado
+# Demanda mínima en botellas por mercado, OJO QUE LLEGA EN LITROS FERMENTADOS NO EN BOTELLAS
 demanda_minima = {
     'A': 9520000,
     'B': 12693333,
