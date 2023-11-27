@@ -130,15 +130,6 @@ max_cepa = {
 }
 
 
-# Variables de decisión
-x = {}
-for p in Productos:
-    x[p] = m.addVar(vtype=GRB.INTEGER, name=f"x_{p}")
-
-# Restricciones de demanda, por 0.75 para que entregue la cantidad de litros que se tienen que producir
-for mkt in M:
-    m.addConstr(sum(x[p] * prop[cep, p] for cep, p in prop if p in Productos and m_b[p] == mkt) >= d_m[mkt])
-from gurobipy import Model, GRB, quicksum
 
 # Creación del modelo
 m = Model("OptimizacionUvas")
@@ -284,7 +275,7 @@ for mkt in M:
 # Crear restricciones para cada vino
 for vino, limite in max_cepa.items():
     blend_terms = [prop[(vino, blend)] * x[blend] for blend in Blends]
-    m.addConstr(x[vino] + quicksum(blend_terms) <= limite, name=f"{vino}_Limit")
+    m.addConstr(x[vino] + quicksum(blend_terms) <= limite*0.89, name=f"{vino}_Limit")
 
 
 
@@ -309,37 +300,14 @@ C4 = Datos_finales[3] + Datos_finales[6]*0.3 + Datos_finales[7]*0.2 + Datos_fina
 C5 = Datos_finales[4] + Datos_finales[9]*0.2 + Datos_finales[11]*0.1 + Datos_finales[12]*0.1 + Datos_finales[13]*0.1
 C6 = Datos_finales[5] + Datos_finales[6]*0.4 + Datos_finales[7]*0.2 + Datos_finales[8]*0.2 + Datos_finales[9]*0.2 + Datos_finales[10]*0.4 + Datos_finales[11]*0.2 + Datos_finales[12]*0.3 + Datos_finales[13]*0.45
 
-Requerimientos = [C1,C2,C3,C4,C5,C6]
-# Restricción para el vino1
-# Crear restricciones para cada vino
-# Crear restricciones para cada vino
-for vino, limite in max_cepa.items():
-    blend_terms = [prop[(vino, blend)] * x[blend] for blend in Blends]
-    m.addConstr(x[vino] + quicksum(blend_terms) <= limite, name=f"{vino}_Limit")
-
-
-
-
-# Función objetivo: Minimizar la cantidad de cepas utilizadas
-m.setObjective(sum(x[p] for p in Productos), GRB.MINIMIZE)
-
-# Optimizar el modelo
-m.optimize()
-
-# Imprimir resultados
-if m.status == GRB.OPTIMAL:
-    for p in Productos:
-        Datos_finales.append(x[p].x)
-        print(f"Cantidad de {p}: {x[p].x}")
-print(Datos_finales)
-
-C1 = Datos_finales[0] + Datos_finales[6]*0.1 + Datos_finales[8]*0.3 + Datos_finales[10]*0.2 + Datos_finales[11]*0.5 + Datos_finales[12]*0.15 + Datos_finales[13]*0.12
-C2 = Datos_finales[1] + Datos_finales[6]*0.2 + Datos_finales[7]*0.4 + Datos_finales[8]*0.2 + Datos_finales[9]*0.2 + Datos_finales[12]*0.15 + Datos_finales[13]*0.15
-C3 = Datos_finales[2] + Datos_finales[7]*0.2 + Datos_finales[8]*0.1 + Datos_finales[9]*0.2 + Datos_finales[10]*0.2 + Datos_finales[11]*0.2 + Datos_finales[12]*0.15 + Datos_finales[13]*0.08
-C4 = Datos_finales[3] + Datos_finales[6]*0.3 + Datos_finales[7]*0.2 + Datos_finales[8]*0.2 + Datos_finales[9]*0.2 + Datos_finales[10]*0.2 + Datos_finales[12]*0.15 + Datos_finales[13]*0.1
-C5 = Datos_finales[4] + Datos_finales[9]*0.2 + Datos_finales[11]*0.1 + Datos_finales[12]*0.1 + Datos_finales[13]*0.1
-C6 = Datos_finales[5] + Datos_finales[6]*0.4 + Datos_finales[7]*0.2 + Datos_finales[8]*0.2 + Datos_finales[9]*0.2 + Datos_finales[10]*0.4 + Datos_finales[11]*0.2 + Datos_finales[12]*0.3 + Datos_finales[13]*0.45
-
-C1 = C1 * 1.4
+print("AAA")
+print(C1,C2,C3,C4,C5,C6)
+C1 = C1 * 1.11
+C2 = C2 * 1.11
+C3 = C3 * 1.11
+C4 = C4 * 1.11
+C5 = C5 * 1.11
+C6 = C6 * 1.11
 Requerimientos = [C1,C2,C3,C4,C5,C6]
 print(Requerimientos)
+

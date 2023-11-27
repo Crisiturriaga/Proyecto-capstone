@@ -15,7 +15,12 @@ Dia = {}  # Dias en que se debe cosechar segun etapa 3
 Vol = {}  # Volumen de cada lote
 Cepa = {}  # Tipo de cepa del lote
 Calidad = {}  # Calidad de cada lote en el dia que se cosecha
-
+C1 = 0
+C2 = 0
+C3 = 0
+C4 = 0
+C5 = 0
+C6 = 0
 for i in range(len(lotes_finales_ordenados)):
     if lotes_finales_ordenados[i][19] == 1:
         lote_id = lotes_finales_ordenados[i][0]
@@ -25,7 +30,21 @@ for i in range(len(lotes_finales_ordenados)):
         Cepa[lote_id] = lotes_finales_ordenados[i][2]
         lista_calidad = lotes_finales_ordenados[i][18]
         Calidad[lote_id] = lista_calidad[lotes_finales_ordenados[i][20]]
-
+        if lotes_finales_ordenados[i][2] == "C1":
+            C1 += Vol[lote_id]
+        if lotes_finales_ordenados[i][2] == "C2":
+            C2 += Vol[lote_id]
+        if lotes_finales_ordenados[i][2] == "C3":
+            C3 += Vol[lote_id]
+        if lotes_finales_ordenados[i][2] == "C4":
+            C4 += Vol[lote_id]
+        if lotes_finales_ordenados[i][2] == "C5":
+            C5 += Vol[lote_id]
+        if lotes_finales_ordenados[i][2] == "C6":
+            C6 += Vol[lote_id]
+print(lotes_finales_ordenados)
+print("GGGGGGGGGGGGG")
+print([C1,C2,C3,C4,C5,C6])
 print(Vol)
 print(Dia)
 print("DDDD")
