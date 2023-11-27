@@ -21,7 +21,7 @@ asignacion_cepa_mercado = {'C1': 'B', 'C2': 'C', 'C3': 'B', 'C4': 'D', 'C5': 'A'
 asignacion_blend_mercado = {'Blend 1': 'D', 'Blend 2': 'B', 'Blend 3': 'B', 'Blend 4': 'C'}  # Ejemplo de asignación
 demanda_minima_litros = {
     'A': 9520000,
-    'B': 1269333,
+    'B': 12693333,
     'C': 11106667,
     'D': 952000
 }
@@ -42,7 +42,7 @@ data_blends = [
 ]
 blend_df = pd.DataFrame(data_blends, columns=['Blend', 'Mercado', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6'])
 
-
+porcentaje_demanda = 0.59
 # Crear el modelo
 modelo = gp.Model("optimizacion_vinos")
 
@@ -71,7 +71,7 @@ for mercado, demanda in demanda_minima_litros.items():
     modelo.addConstr(
         gp.quicksum(x[blend, dia] for blend in blends if asignacion_blend_mercado.get(blend, 'Ninguno') == mercado for dia in range(info_lotes_df['Dia_salida'].min(), info_lotes_df['Dia_salida'].max() + 1)) + 
         gp.quicksum(y[cepa, dia] for cepa in litros_por_cepa.keys() if asignacion_cepa_mercado.get(cepa, 'Ninguno') == mercado for dia in range(info_lotes_df['Dia_salida'].min(), info_lotes_df['Dia_salida'].max() + 1))
-        >= demanda * 0.8,
+        >= demanda * porcentaje_demanda,
         name=f"demanda_min_{mercado}"
     )
 # Añadir una restricción para asegurar que la producción total de botellas no exceda la capacidad total de litros
