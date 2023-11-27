@@ -340,4 +340,6 @@ C4 = Datos_finales[3] + Datos_finales[6]*0.3 + Datos_finales[7]*0.2 + Datos_fina
 C5 = Datos_finales[4] + Datos_finales[9]*0.2 + Datos_finales[11]*0.1 + Datos_finales[12]*0.1 + Datos_finales[13]*0.1
 C6 = Datos_finales[5] + Datos_finales[6]*0.4 + Datos_finales[7]*0.2 + Datos_finales[8]*0.2 + Datos_finales[9]*0.2 + Datos_finales[10]*0.4 + Datos_finales[11]*0.2 + Datos_finales[12]*0.3 + Datos_finales[13]*0.45
 
+C1 = C1 * 1.4
 Requerimientos = [C1,C2,C3,C4,C5,C6]
+print(Requerimientos)
