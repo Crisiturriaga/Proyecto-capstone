@@ -25,6 +25,7 @@ demanda_minima_litros = {
     'C': 11106667,
     'D': 952000
 }
+litros_por_cepa_botellas = {cepa: litros / 0.75 for cepa, litros in litros_por_cepa.items()}
 
 
 # Datos de composición de blends y asignación a mercados
@@ -58,12 +59,12 @@ objetivo = gp.quicksum(
 )
 modelo.setObjective(objetivo, GRB.MAXIMIZE)
 # Restricciones
-# Restricción de cantidad disponible
+# Restricción de cantidad disponible ajustada para trabajar con botellas
 for cepa in litros_por_cepa.keys():
     for dia in range(info_lotes_df['Dia_salida'].min(), info_lotes_df['Dia_salida'].max() + 1):
-        litros_disponibles_dia = sum(registro[1] for registro in info_lotes if registro[0].endswith(cepa) and registro[2] <= dia)
+        litros_disponibles_dia_botellas = sum(registro[1] / 0.75 for registro in info_lotes if registro[0].endswith(cepa) and registro[2] <= dia)
         modelo.addConstr(
-            gp.quicksum(x[blend, dia] * blend_df.loc[blend_df['Blend'] == blend, cepa].item() for blend in blends) + y[cepa, dia] <= litros_disponibles_dia,
+            gp.quicksum(x[blend, dia] * blend_df.loc[blend_df['Blend'] == blend, cepa].item() for blend in blends) + y[cepa, dia] <= litros_disponibles_dia_botellas,
             name=f"restr_cantidad_{cepa}_{dia}"
         )
 # Restricción de satisfacer al menos el 80% de la demanda mínima para cada mercado
