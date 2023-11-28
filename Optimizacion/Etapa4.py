@@ -2,7 +2,7 @@ import sys
 import pandas as pd
 import gurobipy as gp
 from gurobipy import GRB
-from Etapa3 import lotes_finales_ordenados
+from Etapa3 import lotes_finales_ordenados, lista
 import math
 
 # Leer datos del archivo CSV
@@ -165,7 +165,6 @@ else:
 
 # imprimimos el output para etapa 5
 
-print(info_lotes)
 
 # creamos un archivo es output para etapa 4
 # Escribir output en un archivo de texto

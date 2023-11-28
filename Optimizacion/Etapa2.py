@@ -2,6 +2,7 @@ import gurobipy as gp
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from Etapa1 import lista
 
 archivo_excel = 'info-vinos_2023_v2.xlsx'  
 df = pd.read_excel(archivo_excel, sheet_name=1)

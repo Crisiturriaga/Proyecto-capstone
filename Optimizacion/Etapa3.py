@@ -1,5 +1,5 @@
 import gurobipy as gp
-from Etapa1 import Requerimientos,prop
+from Etapa1 import Requerimientos,prop, lista
 from Etapa2 import lotes_finales_ordenados, lote_info
 import numpy as np
 

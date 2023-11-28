@@ -173,7 +173,7 @@ prop = {
     ('C3', 'Blend 2.2'): 0.2,
     ('C4', 'Blend 2.2'): 0.2,
     ('C5', 'Blend 2.2'): 0.2,
-    ('C6', 'Blend 2.2'): 0,
+    ('C6', 'Blend 2.2'): 0.2,
     ('C1', 'Blend 2.3'): 0.2,
     ('C2', 'Blend 2.3'): 0,
     ('C3', 'Blend 2.3'): 0.2,
@@ -281,7 +281,7 @@ for vino, limite in max_cepa.items():
 
 
 # Función objetivo: Minimizar la cantidad de cepas utilizadas
-m.setObjective(sum(x[p] for p in Productos), GRB.MINIMIZE)
+m.setObjective(sum(x[p] for p in Productos), GRB.MAXIMIZE)
 
 # Optimizar el modelo
 m.optimize()
@@ -294,7 +294,6 @@ if m.status == GRB.OPTIMAL:
         lista.append(x[p].x)
 print(Datos_finales)
 print("UUU")
-print(lista)
 C1 = Datos_finales[0] + Datos_finales[6]*0.1 + Datos_finales[8]*0.3 + Datos_finales[10]*0.2 + Datos_finales[11]*0.5 + Datos_finales[12]*0.15 + Datos_finales[13]*0.12
 C2 = Datos_finales[1] + Datos_finales[6]*0.2 + Datos_finales[7]*0.4 + Datos_finales[8]*0.2 + Datos_finales[9]*0.2 + Datos_finales[12]*0.15 + Datos_finales[13]*0.15
 C3 = Datos_finales[2] + Datos_finales[7]*0.2 + Datos_finales[8]*0.1 + Datos_finales[9]*0.2 + Datos_finales[10]*0.2 + Datos_finales[11]*0.2 + Datos_finales[12]*0.15 + Datos_finales[13]*0.08
