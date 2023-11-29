@@ -124,6 +124,10 @@ modelo.optimize()
 # Lista para almacenar la información de los lotes
 info_lotes = []
 
+
+# Lista para almacenar los resultados de la variable w_{ltd}
+resultados_tanques = [[] for _ in T]
+
 # Verificar si se encontró una solución óptima
 if modelo.status == GRB.OPTIMAL:
     print("Solución óptima encontrada.")
@@ -139,6 +143,13 @@ if modelo.status == GRB.OPTIMAL:
                     if w[l, t, d].x > 0.5:
                         cantidad_asignada = z[l, t, d].x
                         print(f'Lote {l} en el día {d} asignado al tanque {t} con {cantidad_asignada} litros')
+
+                        # Agregar información a la lista de resultados_tanques
+                        resultados_tanques[t].append({
+                            'lote': l,
+                            'dia': d,
+                            'cantidad_asignada': cantidad_asignada
+                        })
 
                         # Acumular los litros asignados a cada lote
                         if l not in litros_por_lote:
@@ -199,3 +210,23 @@ with open('output_etapa4.txt', 'w') as file:
     # Imprimir la lista para etapa 5
     file.write("\nOutput para Etapa 5:\n")
     file.write(str(info_lotes))
+
+
+print("\nResultados por tanque:")
+for t, resultados in enumerate(resultados_tanques):
+    print(f"\nTanque {t}:")
+    for resultado in resultados:
+        print(f"Lote {resultado['lote']} en el día {resultado['dia']} con {resultado['cantidad_asignada']} litros")
+
+
+import pandas as pd
+
+# Suponiendo que resultados_tanques es una lista de listas de diccionarios como en tu código
+# resultados_tanques = [ [ {'lote': 1, 'dia': 1, 'cantidad_asignada': 100}, ...], ... ]
+
+
+contador_tanques = 0
+for t, resultados in enumerate(resultados_tanques):
+    contador_tanques += 1
+    for resultado in resultados:
+        pass

@@ -1,7 +1,7 @@
 import pandas as pd
 import gurobipy as gp
 from gurobipy import GRB
-from Etapa4 import info_lotes, litros_por_cepa, lista, lotes_fin
+from Etapa4 import info_lotes, litros_por_cepa, lista, lotes_fin, contador_tanques
 # Datos de entrada
 print("EEEEE")
 print(info_lotes)
@@ -289,6 +289,24 @@ Costo_total_botellas = Costo_mercado_A + Costo_mercado_B + Costo_mercado_C + Cos
 Utilidad_por_botellas = Ingreso_total_botellas - Costo_total_botellas
 
 
+#Procesando tanques (todos los tanques se arriendan con anticipacion, ninguno sobre la marcha)
+def tanq_planta(cantidad_tanques):
+    if cantidad_tanques >= (24*3):
+        return (24 * 3)
+    else:
+        return(cantidad_tanques)
+
+Tanques_planta1 = tanq_planta(contador_tanques)
+Tanques_planta2 = tanq_planta(contador_tanques - Tanques_planta1)
+Tanques_planta3 = tanq_planta(contador_tanques - Tanques_planta1 - Tanques_planta2)
+
+costo_planta1 = Tanques_planta1 * 1500 * 25
+costo_planta2 = Tanques_planta2 * 1600 * 25
+costo_planta3 = Tanques_planta3 * 1800 * 25
+
+costo_plantas = costo_planta1 + costo_planta2 + costo_planta3
+
+
 print(f"Utilidad por botellas mercado A: {Utilidad_A}")
 print("...")
 print(f"Utilidad por botellas mercado B: {Utilidad_B}")
@@ -319,13 +337,14 @@ print(f"Este es el costo de comprar los lotes: {costo_compra_lotes}")
 print("...")
 print(f"Utilidades totales hasta el momento Uti. por botellas - costo compra lotes: {Utilidad_por_botellas - costo_compra_lotes}")
 print("...")
-print(f"La cantidad de lotes que se compran y de fermentan es: {cantidad_lotes}")
-
-
-print("imprimiendo info lotes")
-print(info_lotes)
-print(litros_por_cepa)
-print(lista)
-
-
-#utilidad final me dio 59.379.127,39903769
+print(f"La cantidad de lotes que se compran y se fermentan es: {cantidad_lotes}")
+print("...")
+print(f"Cantidad de tanques usados en planta 1: {Tanques_planta2}, su costo es {costo_planta2}")
+print("...")
+print(f"Cantidad de tanques usados en planta 2: {Tanques_planta1}, su costo es {costo_planta1}")
+print("...")
+print(f"Cantidad de tanques usados en planta 3: {Tanques_planta3}, su costo es {costo_planta3}")
+print("...")
+print(f"El costo total en tanques es: {costo_plantas}")
+print("...")
+print(f"Utilidades totales hasta el momento Uti. por botellas - costo compra lotes - costo arriendo plantas: {Utilidad_por_botellas - costo_compra_lotes - costo_plantas}")
