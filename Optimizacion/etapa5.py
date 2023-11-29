@@ -124,6 +124,9 @@ for cepa in litros_por_cepa.keys():
 # Optimización
 modelo.optimize()
 
+
+botellas_finales = []
+
 # Ver resultados
 if modelo.Status == GRB.OPTIMAL:
     print("Producción total por Cepa y Blend:")
@@ -133,6 +136,7 @@ if modelo.Status == GRB.OPTIMAL:
         total_cepa = sum((y[cepa, dia].X / 0.75 for dia in
                           range(info_lotes_df['Dia_salida'].min(), info_lotes_df['Dia_salida'].max() + 1)))
         print(f"Cepa {cepa}: {total_cepa:.2f} botellas")
+        
 
     # Imprimir la producción por Blend
     for blend in blends:
@@ -147,23 +151,21 @@ if modelo.Status == GRB.OPTIMAL:
                          sum((y[cepa, dia].X / 0.75 for cepa in litros_por_cepa.keys() if
                               asignacion_cepa_mercado.get(cepa, 'Ninguno') == mercado for dia in
                               range(info_lotes_df['Dia_salida'].min(), info_lotes_df['Dia_salida'].max() + 1)))
+        print(total_botellas)
+        botellas_finales.append(total_botellas)
         print(f"Mercado {mercado}: {total_botellas:.2f} botellas")
+
 else:
     print("No se encontró una solución óptima.")
 
 
 ultimos_lotes = []
 for lote_1 in lotes_fin:
-    print(type(lote_1))  # Imprime el tipo de lote_1
-    print(len(lote_1))   # Imprime la longitud de lote_1
-    print(lote_1)  
     for lote_2 in info_lotes:
         if lote_2[0] == lote_1[0]:
             ultimos_lotes.append(lote_1)
 
 
-print("Imprimiendo lotes")
-print(ultimos_lotes)
 for lote in ultimos_lotes:
     lote.pop(18)
 
@@ -189,3 +191,141 @@ df.to_excel("archivo_excel.xlsx", index=False)
 #El atributo lote[18] es una binaria que entrega un 1 si se cosecha el lote, cero si no se cosecha
 #El atributo lote[19] entrega el dia en que se debe cosechar el lote, si no se cosecha, el valor del atributo es (-1)
 #El atributo lote[20] calidad con la que se cosechó el lote
+print (f"Esta la cantidad de botellas por mercado{botellas_finales}")
+
+#calcular cantidad de lotes a comprar y fermentar
+cantidad_lotes = len(ultimos_lotes)
+
+#Calcular costos de comprar los lotes
+#Calcular cuanto cuesta la compra de lotes (precio de los kilos del lote)
+costo_compra_lotes = 0
+costo_c1 = 0
+costo_c2 = 0
+costo_c3 = 0
+costo_c4 = 0
+costo_c5 = 0
+costo_c6 = 0
+kilos_c1 = 0
+kilos_c2 = 0
+kilos_c3 = 0
+kilos_c4 = 0
+kilos_c5 = 0
+kilos_c6 = 0
+for lote in ultimos_lotes:
+    if lote[2] == "C1":
+        costo_c1 += lote[3] * 1000 * lote[7] * (lote[15] * lote[20] + lote[16] * 0.8)
+
+    if lote[2] == "C2":
+        costo_c2 += lote[3] * 1000 * lote[7] * (lote[15] * lote[20] + lote[16] * 0.8)
+
+    if lote[2] == "C3":
+        costo_c3 += lote[3] * 1000 * lote[7] * (lote[15] * lote[20] + lote[16] * 0.8)
+
+    if lote[2] == "C4":
+        costo_c4 += lote[3] * 1000 * lote[7] * (lote[15] * lote[20] + lote[16] * 0.8)
+
+    if lote[2] == "C5":
+        costo_c5 += lote[3] * 1000 * lote[7] * (lote[15] * lote[20] + lote[16] * 0.8)
+    
+    if lote[2] == "C6":
+        costo_c6 += lote[3] * 1000 * lote[7] * (lote[15] * lote[20] + lote[16] * 0.8)
+
+
+
+
+costo_compra_lotes = costo_c1 + costo_c2 + costo_c3 + costo_c4 + costo_c5 + costo_c6
+
+#Calcular costos/ingresos por botellas en mercados
+Ingreso_mercado_A = 0
+Ingreso_mercado_B = 0
+Ingreso_mercado_C = 0
+Ingreso_mercado_D = 0
+Costo_mercado_A = 0
+Costo_mercado_B = 0
+Costo_mercado_C = 0
+Costo_mercado_D = 0
+costo_A = 2.875
+costo_B = 2.375
+costo_C = 1.825
+costo_D = 1.545
+# nose cual queri poner aca
+#precio max es 6, precio min es 4 para A
+p_A =6
+#precio max es 4.5, precio min es 2.8 para B
+p_B =4.5
+#precio max es 3.5, precio min es 2.1 para C
+p_C =3.5
+#precio max es 2.2, precio min es 1.5 para D
+p_D =2.2
+for i in range(0,len(botellas_finales)):
+    if i == 0:
+        Ingreso_mercado_A += botellas_finales[i]*p_A
+        Costo_mercado_A += botellas_finales[i] * costo_A
+    elif i == 1:
+        Ingreso_mercado_B += botellas_finales[i] * p_B
+        Costo_mercado_B += botellas_finales[i] * costo_B
+
+    elif i == 2:
+        Ingreso_mercado_C += botellas_finales[i] * p_C
+        Costo_mercado_C += botellas_finales[i] * costo_C
+
+    elif i == 3:
+        Ingreso_mercado_D += botellas_finales[i] * p_D
+        Costo_mercado_D += botellas_finales[i] * costo_D
+
+
+#Utilidades por mercado sin costos por compra de lote
+Utilidad_A = Ingreso_mercado_A - Costo_mercado_A 
+
+Utilidad_B = Ingreso_mercado_B - Costo_mercado_B
+
+Utilidad_C = Ingreso_mercado_C - Costo_mercado_C
+
+Utilidad_D = Ingreso_mercado_D - Costo_mercado_D
+
+Ingreso_total_botellas = Ingreso_mercado_A + Ingreso_mercado_B + Ingreso_mercado_C + Ingreso_mercado_D
+Costo_total_botellas = Costo_mercado_A + Costo_mercado_B + Costo_mercado_C + Costo_mercado_D
+
+Utilidad_por_botellas = Ingreso_total_botellas - Costo_total_botellas
+
+
+print(f"Utilidad por botellas mercado A: {Utilidad_A}")
+print("...")
+print(f"Utilidad por botellas mercado B: {Utilidad_B}")
+print("...")
+print(f"Utilidad por botellas mercado C: {Utilidad_C}")
+print("...")
+print(f"Utilidad por botellas mercado D: {Utilidad_D}")
+print("...")
+print(f"Ingresos por botellas: {Ingreso_total_botellas}")
+print("...")
+print(f"Costo por botellas: {Costo_total_botellas}")
+print("...")
+print(f"Utilidad solo por botellas: {Utilidad_por_botellas}")
+print("...")
+print(f"Costos de compra de lotes de C1: {costo_c1}")
+print("...")
+print(f"Costos de compra de lotes de C2: {costo_c2}")
+print("...")
+print(f"Costos de compra de lotes de C3: {costo_c3}")
+print("...")
+print(f"Costos de compra de lotes de C4: {costo_c4}")
+print("...")
+print(f"Costos de compra de lotes de C5: {costo_c5}")
+print("...")
+print(f"Costos de compra de lotes de C6: {costo_c6}")
+print("...")
+print(f"Este es el costo de comprar los lotes: {costo_compra_lotes}")
+print("...")
+print(f"Utilidades totales hasta el momento Uti. por botellas - costo compra lotes: {Utilidad_por_botellas - costo_compra_lotes}")
+print("...")
+print(f"La cantidad de lotes que se compran y de fermentan es: {cantidad_lotes}")
+
+
+print("imprimiendo info lotes")
+print(info_lotes)
+print(litros_por_cepa)
+print(lista)
+
+
+#utilidad final me dio 59.379.127,39903769

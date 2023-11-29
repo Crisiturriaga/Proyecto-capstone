@@ -145,6 +145,7 @@ if modelo.status == GRB.OPTIMAL:
                             litros_por_lote[l] = 0
                         litros_por_lote[l] += cantidad_asignada/8
 
+
     # Agregar la información de cada lote a la lista
     for l in litros_por_lote:
         dia_salida = Dia[l] + Dur - 1
