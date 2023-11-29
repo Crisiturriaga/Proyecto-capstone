@@ -1,7 +1,7 @@
 import pandas as pd
 import gurobipy as gp
 from gurobipy import GRB
-from Etapa4 import info_lotes, litros_por_cepa, lista
+from Etapa4 import info_lotes, litros_por_cepa, lista, lotes_fin
 # Datos de entrada
 print("EEEEE")
 print(info_lotes)
@@ -150,3 +150,42 @@ if modelo.Status == GRB.OPTIMAL:
         print(f"Mercado {mercado}: {total_botellas:.2f} botellas")
 else:
     print("No se encontró una solución óptima.")
+
+
+ultimos_lotes = []
+for lote_1 in lotes_fin:
+    print(type(lote_1))  # Imprime el tipo de lote_1
+    print(len(lote_1))   # Imprime la longitud de lote_1
+    print(lote_1)  
+    for lote_2 in info_lotes:
+        if lote_2[0] == lote_1[0]:
+            ultimos_lotes.append(lote_1)
+
+
+print("Imprimiendo lotes")
+print(ultimos_lotes)
+for lote in ultimos_lotes:
+    lote.pop(18)
+
+# Crear un DataFrame de pandas a partir de la lista de listas
+df = pd.DataFrame(ultimos_lotes)
+
+# Guardar el DataFrame en un archivo Excel
+df.to_excel("archivo_excel.xlsx", index=False)
+
+
+
+#El atributo lote[0] Nombre lote
+#El atributo lote[1] Numero lote
+#El atributo lote[2] Tipo Uva
+#El atributo lote[3] Ton lote
+#El atributo lote[4] dia optimo
+#El atributo lote[5] seca a lluvia
+#El atributo lote[6] lluvia a lluvia
+#El atributo lote[7] costo por kg
+#El atributo lote[15] binaria spot
+#El atributo lote[16] binaria fwd
+#El atributo lote[--] Lista de calidad a lo largo de todos los dias
+#El atributo lote[18] es una binaria que entrega un 1 si se cosecha el lote, cero si no se cosecha
+#El atributo lote[19] entrega el dia en que se debe cosechar el lote, si no se cosecha, el valor del atributo es (-1)
+#El atributo lote[20] calidad con la que se cosechó el lote

@@ -330,4 +330,4 @@ for lote in lotes_finales:
 print(fwd/290)
 print(spot/290)
 
-#print(lotes_finales_ordenados)
+print(lotes_finales_ordenados)

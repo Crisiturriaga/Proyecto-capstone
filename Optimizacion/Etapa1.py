@@ -281,7 +281,7 @@ for vino, limite in max_cepa.items():
 
 
 # Función objetivo: Minimizar la cantidad de cepas utilizadas
-m.setObjective(sum(x[p] for p in Productos), GRB.MAXIMIZE)
+m.setObjective(sum(x[p] for p in Productos), GRB.MINIMIZE)
 
 # Optimizar el modelo
 m.optimize()
@@ -311,4 +311,3 @@ C5 = C5 * 1.11
 C6 = C6 * 1.11
 Requerimientos = [C1,C2,C3,C4,C5,C6]
 print(Requerimientos)
-

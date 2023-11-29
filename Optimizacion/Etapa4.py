@@ -42,6 +42,7 @@ for i in range(len(lotes_finales_ordenados)):
             C5 += Vol[lote_id]
         if lotes_finales_ordenados[i][2] == "C6":
             C6 += Vol[lote_id]
+lotes_fin = lotes_finales_ordenados
 print(lotes_finales_ordenados)
 print("GGGGGGGGGGGGG")
 print([C1,C2,C3,C4,C5,C6])

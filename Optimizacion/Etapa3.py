@@ -154,7 +154,7 @@ for f in F:
         m.addConstr(gp.quicksum(y[l,f,t] for l in L) + o[f,t] <= 1)
 
 
-m.setParam(gp.GRB.Param.MIPGap, 0.9) 
+m.setParam(gp.GRB.Param.MIPGap, 0.8) 
 
 
 m.optimize()
@@ -219,6 +219,13 @@ for lote in lotes_finales_ordenados:
         lote.append(-1)
 print(lotes_finales_ordenados[289])
 
+for lote in lotes_finales_ordenados:
+    if lote[20] != -1:
+        calidad = lote[18][lote[20]]
+        lote.append(calidad)
+
 #La lista que se debe importar a la etapa 4 es "lotes_finales_ordenados"
+#El atributo lote[15] binaria spot
+#El atributo lote[16] binaria fwd
 #El atributo lote[19] es una binaria que entrega un 1 si se cosecha el lote, cero si no se cosecha
 #El atributo lote[20] entrega el dia en que se debe cosechar el lote, si no se cosecha, el valor del atributo es (-1)
