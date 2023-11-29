@@ -260,6 +260,22 @@ max_cepa = {
     'C6': 14966250
 }
 
+utilidad = {
+    'C1':(3.225 - 2.375),
+    'C2':(2.45 - 1.825),
+    'C3':(3.225 - 2.375) ,
+    'C4':(1.675 - 1.545) ,
+    'C5':(4.5 - 2.875),
+    'C6':(1.675 - 1.545) ,
+    'Blend 1.1':(1.675 - 1.545) ,
+    'Blend 1.2':(1.675 - 1.545) ,
+    'Blend 2.1':(3.225 - 2.375) ,
+    'Blend 2.2':(3.225 - 2.375) ,
+    'Blend 2.3':(3.225 - 2.375),
+    'Blend 3.1':(3.225 - 2.375),
+    'Blend 4.1':(2.45 - 1.825) ,
+    'Blend 4.2':(2.45 - 1.825)
+}
 
 # Variables de decisión
 x = {}
@@ -281,7 +297,7 @@ for vino, limite in max_cepa.items():
 
 
 # Función objetivo: Minimizar la cantidad de cepas utilizadas
-m.setObjective(sum(x[p] for p in Productos), GRB.MINIMIZE)
+m.setObjective(sum(x[p] * utilidad[p] for p in Productos), GRB.MAXIMIZE)
 
 # Optimizar el modelo
 m.optimize()

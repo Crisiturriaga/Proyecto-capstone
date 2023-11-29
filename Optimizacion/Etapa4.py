@@ -113,7 +113,7 @@ for l in L:
                 modelo.addConstr(w[l, t, d] == w[l, t, d + 1], f'continuidad_lote_tanque_{l}{t}{d}')
 
 # Parámetros de optimización
-mip_Gap = 0.2
+mip_Gap = 0.01
 modelo.setParam("MIPGap", mip_Gap)
 time_limit_seconds = 3600
 modelo.setParam("TimeLimit", time_limit_seconds)

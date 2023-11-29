@@ -154,7 +154,7 @@ for f in F:
         m.addConstr(gp.quicksum(y[l,f,t] for l in L) + o[f,t] <= 1)
 
 
-m.setParam(gp.GRB.Param.MIPGap, 0.8) 
+m.setParam(gp.GRB.Param.MIPGap, 0.2) 
 
 
 m.optimize()
